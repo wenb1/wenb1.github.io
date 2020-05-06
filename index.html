@@ -4,7 +4,7 @@ class: home
 css: ['pages/index.css']
 comments: false
 ---
-<script src="https://code.iconify.design/1/1.0.6/iconify.min.js"></script>
+<head><script src="https://code.iconify.design/1/1.0.6/iconify.min.js"></script></head>
 <section class="banner">
     <div class="collection-head">
       <div class="container">
@@ -26,10 +26,11 @@ comments: false
                   <span class="octicon octicon-mark-github"></span>
                   <a href="https://github.com/{{ site.github_username }}" target="_blank">{{ site.github_username }}</a>
                 </span>
-                <span class="meta-info">
-                  <span class="iconify" data-icon="octicon-location" data-inline="false"></span></span>
-                  {{ site.email }}
+                
+                <span class="iconify" data-icon="octicon-location" data-inline="false">
+                {{ site.email }}
                 </span>
+                
               </div>
             </div>
         </div>
