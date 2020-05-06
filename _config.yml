@@ -2,7 +2,7 @@
 #   Main Configs   #
 # ---------------- #
 baseurl:
-#url: https://mazhuang.org
+url: https://wenb1.github.io
 date_format: "ordinal"
 title: Bo Wen
 subtitle: ""
