@@ -4,8 +4,8 @@
 baseurl:
 url: https://wenb1.github.io
 date_format: "ordinal"
-title: Bo Wen
-subtitle: ""
+title: Bo Wen(问博)
+subtitle: "From electrical engineering to computer science"
 description: "Bo Wen's personal blog"
 keywords: mcmaster, Bo Wen, wenb1, 问博
 timezone: Asia/Shanghai
@@ -19,7 +19,6 @@ author: Bo Wen
 organization: 
 organization_url: 
 github_username: wenb1
-location: Baoding, Hebei, China
 location: Hamilton, Ontario, Canada
 email: wenb1@yahoo.com
 
