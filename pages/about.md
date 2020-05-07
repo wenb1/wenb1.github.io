@@ -8,9 +8,9 @@ menu: 关于
 permalink: /about/
 ---
 
-I'm Bo Wen, future master student in computing and software.
+I'm Bo Wen, a future master student in computing and software.
+
 Currenly living in Hamilton, Ontario, Canada.
-Enthusiastic about computer science.
 
 ## Contact(联系)
 
