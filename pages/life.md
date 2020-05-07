@@ -1,8 +1,8 @@
 ---
 layout: page
 title: Life
-description: 我的个人生活
-keywords: 生活
+description: There is only one true heroism in the world: to see the world as it is, and to love it
+keywords: 生活, life
 comments: true
 menu: 生活
 permalink: /life/

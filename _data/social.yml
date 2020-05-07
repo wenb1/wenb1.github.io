@@ -1,27 +1,15 @@
 - sitename: GitHub
-  name: mzlogin
-  url: https://github.com/mzlogin
+  name: wenb1
+  url: https://github.com/wenb1
 
-- sitename: 掘金
-  name: mzlogin
-  url: http://gold.xitu.io/user/570ddaeb2e958a005c63b2da
+- sitename: Facebook
+  name: Bo Wen
+  url: https://www.facebook.com/profile.php?id=100006223938607
 
 - sitename: LinkedIn
-  name: mazhuang
-  url: https://www.linkedin.com/in/mazhuang
+  name: Bo Wen
+  url: https://www.linkedin.com/in/bo-wen-42b75015a/
 
-- sitename: 博客
-  name: 码志
-  url: http://mazhuang.org
-
-- sitename: 微博
-  name: mzlogin
-  url: http://weibo.com/mzlogin
-
-- sitename: 知乎
-  name: mzlogin
-  url: http://www.zhihu.com/people/mzlogin
-
-- sitename: 豆瓣
-  name: 壮哥不胖
-  url: http://www.douban.com/people/freedim
+- sitename: Blog
+  name: Bo Wen
+  url: https://wenb1.github.io/

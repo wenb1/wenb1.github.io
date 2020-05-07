@@ -1,19 +1,20 @@
-- name: Software Engineer Keywords
+- name: Computer Basics
+  keywords:
+      - Computer Network
+      - Database
+      - Datastructure
+      - Algorithm
+      - Design Patterns
+      - Operating System
+
+- name: Software Engineer Skills
   keywords:
       - Java
-      - C++
+      - Spring Boot
+      - MyBatis
       - Python
-      - Design Patterns
+      - Git
+      - SVN
+      - Nginx
+      - MySQL
 
-- name: Mobile Developer Keywords
-  keywords:
-      - Android
-      - Reverse Engineering
-
-- name: Windows Developer Keywords
-  keywords:
-      - Win32 SDK
-      - DuiLib
-      - WTL
-      - COM
-      - WinDbg
