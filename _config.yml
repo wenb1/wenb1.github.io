@@ -5,8 +5,8 @@ baseurl:
 url: https://wenb1.github.io
 date_format: "ordinal"
 title: Codedale
-subtitle: "From electrical engineering to computer science"
-description: "Bo Wen's personal blog"
+subtitle: "Yesterday is history, tomorrow is a mystery, today is a gift of God, which is why we call it the present"
+description: "Bo Wen's blog"
 keywords: mcmaster, Bo Wen, wenb1, 问博
 timezone: Asia/Shanghai
 encoding: "utf-8"
