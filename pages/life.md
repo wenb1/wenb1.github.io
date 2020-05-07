@@ -2,9 +2,9 @@
 layout: page
 title: Life
 description: There is only one true heroism in the world: to see the world as it is, and to love it
-keywords: 生活, life
+keywords: Life
 comments: true
-menu: 生活
+menu: Life
 permalink: /life/
 ---
 
