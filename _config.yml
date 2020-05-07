@@ -4,7 +4,7 @@
 baseurl:
 url: https://wenb1.github.io
 date_format: "ordinal"
-title: Bo Wen(问博)
+title: Codedale
 subtitle: "From electrical engineering to computer science"
 description: "Bo Wen's personal blog"
 keywords: mcmaster, Bo Wen, wenb1, 问博
@@ -97,11 +97,11 @@ comments_provider: gitalk
 #        client_id: d2e1cbbd298958076462
 #        client_secret: b42a4178e5fd4a7cf63189ef4b1453b05c375709
 # https://github.com/gitalk/gitalk#install
-#gitalk:
-#    owner: mzlogin
-#    repo: blog-comments
-#    clientID: d2e1cbbd298958076462
-#    clientSecret: b42a4178e5fd4a7cf63189ef4b1453b05c375709
+gitalk:
+    owner: wenb1
+    repo: blog-comments
+    clientID: c846625ee18611b57d96
+    clientSecret: 8e6ff134730f5c3ceb9c537c6f54cecbba0adff5
 # 在使用其它评论组件时可点击显示 Disqus
 #lazy_load_disqus : false
 

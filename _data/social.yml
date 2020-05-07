@@ -2,6 +2,10 @@
   name: wenb1
   url: https://github.com/wenb1
 
+- sitename: Blog
+  name: Codedale
+  url: https://wenb1.github.io/
+
 - sitename: Facebook
   name: Bo Wen
   url: https://www.facebook.com/profile.php?id=100006223938607
@@ -10,6 +14,4 @@
   name: Bo Wen
   url: https://www.linkedin.com/in/bo-wen-42b75015a/
 
-- sitename: Blog
-  name: Bo Wen
-  url: https://wenb1.github.io/
+
