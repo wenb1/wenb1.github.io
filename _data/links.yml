@@ -1,15 +1,7 @@
 - name: Junni Pan's blog
   url: https://www.lastace.org/
   src: life
-
-- name: 只宁静不致远
-  url: http://zxning.github.io
-  src: life
-
-- name: Blog Something
-  url: http://chenxiaoyoyo.github.io
-  src: life
-
+  
 - name: 码志
   url: http://mazhuang.org
   src: www
