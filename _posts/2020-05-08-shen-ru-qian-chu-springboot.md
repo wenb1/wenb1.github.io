@@ -24,9 +24,9 @@ try{
      ......
      conn.commit(); //手动提交事务
      
-} catch（){
+} catch{
     conn.rollback(); //事务回滚
-}finally {
+}finally{
     conn.setAutoCommit(true); //开启自动事务
     conn.close(); //关闭连接
 }
@@ -150,13 +150,13 @@ Spring的事务允许进行许多配置，比如传播行为，隔离级别，�
 
 克服不可重复读例子：
 
-![克服不可重复读例子](/images/posts/springboot/chapter6_7.png)
+![克服不可重复读例子](/images/posts/springboot/chapter6_7.PNG)
 
 虽然克服了不可重复读的情况，但是又会引发新的问题，这就是幻读。
 
 幻读例子：
 
-![幻读例子](/images/posts/springboot/chapter6_8.png)
+![幻读例子](/images/posts/springboot/chapter6_8.PNG)
 
 可重复读和幻读，是比较难以理解的内容， 这里稍微论述一下。首先这里的笔数不是数据库存储的值，而是一个统计值，商品库存则是数据库存储的值，这一点是要注意的。也就是幻读不是针对一条数据库记录而言，而是多条记录，例如， 这51 笔交易笔数就是多条数据库记录统计出来的。而可重复读是针对数据库的单一条记录，例如，商品的库存是以数据库里面的一条记录存储的，它可以产生可重复读，而不能产生幻读。
 
