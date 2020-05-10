@@ -87,7 +87,7 @@ LinkedList具体实现的功能在[LinkedList官方文档](https://docs.oracle.c
 
 ArrayList 是数组队列，相当于动态数组。与Java中的数组相比，它的容量能动态增长。
 
-通过源码，我们可以看到，ArrayList的实现其实是依赖一个数组(array)，通过维护这个数组来维护整个ArrayList。既然底层是数组，那么如何动态扩容呢？源码是这样做的：
+通过源码，我们可以看到，ArrayList的实现其实是依赖一个数组(array)，通过维护这个数组来维护整个ArrayList。既然底层是数组，那么如何动态扩容呢？**源码是这样做的**：
 
 ```java
 /**
@@ -156,8 +156,126 @@ ArrayList 是数组队列，相当于动态数组。与Java中的数组相比，
 
 根据这一系列源码，我们能看到，扩容的过程如下：
 
-1. 如果一开始我们构建了一个无参的ArrayList，那它底层的数组长度就是0。之后，我们如果想要添加一个新元素，显然长度为0的数组是不能存放任何元素的，所以我们就需要构建一个新的数组。源码是这样做的：先比较规定的默认长度，也就是10，与添加这个元素之后的长度，也就是1，之后取最大的数作为数组长度，也就是10。所以无参构建ArrayList，添加一个元素之后的底层数组长度是10。
+1. 如果一开始我们调用了无参的ArrayList构造方法，那它底层的数组长度就是0。之后，我们如果想要添加一个新元素，显然长度为0的数组是不能存放任何元素的，所以我们就需要构建一个新的数组。源码是这样做的：先比较规定的默认长度，也就是10，与添加这个元素之后的长度，也就是1，之后取最大的数作为数组长度，也就是10。所以无参构建ArrayList，添加一个元素之后的底层数组长度是10。
 2. 之后如果需要存放的元素数目超过了10，比如11，我们把11叫做minCapacity，也就是需要存放所有元素所需要的最小容量。如果发现容量不够了，需要扩容到原来容量的3/2倍。如果扩容之后，扩容之后的长度还是比minCapacity小，那么我们就把minCapacity定为扩充容量。另一种情况是，需要的容量比规定的数组最大容量还要大，那么我们就把最大的整数值作为扩充容量。
+
+我们知道对于数组，它的优势在于随机访问，也就是给定一个索引，可以使用O(1)的时间访问索引对应的值。缺点也很明显，对于在非末尾的指定位置添加和删除这两种情况，需要整体移动添加位置和删除位置后的元素。
+
+**源码的在指定索引位置添加元素**：
+
+```java
+/**
+     * A version of rangeCheck used by add and addAll.
+     */
+    private void rangeCheckForAdd(int index) {
+        if (index > size || index < 0)
+            throw new IndexOutOfBoundsException(outOfBoundsMsg(index));
+    }
+/**
+     * Constructs an IndexOutOfBoundsException detail message.
+     * Of the many possible refactorings of the error handling code,
+     * this "outlining" performs best with both server and client VMs.
+     */
+    private String outOfBoundsMsg(int index) {
+        return "Index: "+index+", Size: "+size;
+    }
+/**
+     * Inserts the specified element at the specified position in this
+     * list. Shifts the element currently at that position (if any) and
+     * any subsequent elements to the right (adds one to their indices).
+     *
+     * @param index index at which the specified element is to be inserted
+     * @param element element to be inserted
+     * @throws IndexOutOfBoundsException {@inheritDoc}
+     */
+    public void add(int index, E element) {
+        rangeCheckForAdd(index);
+
+        ensureCapacityInternal(size + 1);  // Increments modCount!!
+        System.arraycopy(elementData, index, elementData, index + 1,
+                         size - index);
+        elementData[index] = element;
+        size++;
+    }
+```
+
+我们可以看到，凡是添加方法都要考虑扩容问题，因为这个方法还指定了索引位置，所以还要考虑索引越界的问题。在通过了检查之后，源码调用了System.arraycopy()方法，整体平移了一个单位索引后面的元素。再在指定位置插入元素。
+
+**源码的删除方法**：
+
+```java
+/**
+     * Removes the element at the specified position in this list.
+     * Shifts any subsequent elements to the left (subtracts one from their
+     * indices).
+     *
+     * @param index the index of the element to be removed
+     * @return the element that was removed from the list
+     * @throws IndexOutOfBoundsException {@inheritDoc}
+     */
+    public E remove(int index) {
+        rangeCheck(index);
+
+        modCount++;
+        E oldValue = elementData(index);
+
+        int numMoved = size - index - 1;
+        if (numMoved > 0)
+            System.arraycopy(elementData, index+1, elementData, index,
+                             numMoved);
+        elementData[--size] = null; // clear to let GC do its work
+
+        return oldValue;
+    }
+
+    /**
+     * Removes the first occurrence of the specified element from this list,
+     * if it is present.  If the list does not contain the element, it is
+     * unchanged.  More formally, removes the element with the lowest index
+     * <tt>i</tt> such that
+     * <tt>(o==null&nbsp;?&nbsp;get(i)==null&nbsp;:&nbsp;o.equals(get(i)))</tt>
+     * (if such an element exists).  Returns <tt>true</tt> if this list
+     * contained the specified element (or equivalently, if this list
+     * changed as a result of the call).
+     *
+     * @param o element to be removed from this list, if present
+     * @return <tt>true</tt> if this list contained the specified element
+     */
+    public boolean remove(Object o) {
+        if (o == null) {
+            for (int index = 0; index < size; index++)
+                if (elementData[index] == null) {
+                    fastRemove(index);
+                    return true;
+                }
+        } else {
+            for (int index = 0; index < size; index++)
+                if (o.equals(elementData[index])) {
+                    fastRemove(index);
+                    return true;
+                }
+        }
+        return false;
+    }
+/*
+     * Private remove method that skips bounds checking and does not
+     * return the value removed.
+     */
+    private void fastRemove(int index) {
+        modCount++;
+        int numMoved = size - index - 1;
+        if (numMoved > 0)
+            System.arraycopy(elementData, index+1, elementData, index,
+                             numMoved);
+        elementData[--size] = null; // clear to let GC do its work
+    }
+```
+
+1. 在指定位置删除元素和在指定位置添加元素很类似，不同的是在移动完所有元素后，最后一个元素要交给GC线程回收。
+
+2. 对于删除一个元素的方法，我们注意到null也是可以被删除的，我们之前看的删除过程被封装到了fastRemove()方法里。
+
+ArrayList的实现的具体实现的方法在[ArrayList的官方文档](https://docs.oracle.com/javase/8/docs/api/java/util/ArrayList.html)中。
 
 ### 3.2 Set
 
