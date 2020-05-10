@@ -22,13 +22,13 @@ Java的集合是非常重要的概念之一，Java本身的collection库和map�
 
 **collection接口规定的功能**：
 
-官方文档(https://docs.oracle.com/javase/8/docs/api/java/util/Collection.html)
+[collection官方文档](https://docs.oracle.com/javase/8/docs/api/java/util/Collection.html)
 
 注意到collection接口并没有定义用于随机访问的get()方法，这是因为collection里包含了堆(set)，而堆有自己的一套内部顺序，这让随机访问没有意义。
 
 **map接口规定的功能**：
 
-官方文档(https://docs.oracle.com/javase/8/docs/api/java/util/Map.html)
+[map官方文档](https://docs.oracle.com/javase/8/docs/api/java/util/Map.html)
 
 ## 3. 重要集合介绍
 
@@ -81,7 +81,7 @@ LinkedList有两个构造方法:
     }
 ```
 
-LinkedList具体实现的功能在官方文档中(https://docs.oracle.com/javase/8/docs/api/java/util/LinkedList.html)。
+LinkedList具体实现的功能在[LinkedList官方文档](https://docs.oracle.com/javase/8/docs/api/java/util/LinkedList.html)中。
 
 #### 3.1.2 ArrayList详解
 
