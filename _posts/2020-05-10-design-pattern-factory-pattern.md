@@ -13,7 +13,7 @@ keywords: DesignPattern, 设计模式
 
 ### 1.1 实现结构图
 
-![简单工厂模式结构图](/images/post/designpattern/factory_pattern_uml_diagram.png)
+![简单工厂模式结构图](/images/posts/designpattern/factory_pattern_uml_diagram.png)
 
 我们有一个shape的接口，这个接口有三个实现类，Circle，Square，Rectangle，工厂就负责制造这三个实现类。
 
@@ -140,5 +140,7 @@ public class FactoryPatternDemo {
 - 客户端只知道传入工厂类的参数，对于如何创建对象不关心：客户端既不需要关心创建细节，甚至连类名都不需要记住，**只需要知道类型所对应的参数**。
 
 **参考文章**：
+
 [工厂模式--简单工厂模式](https://www.jianshu.com/p/5cb52d84bd6d)
+
 [Design Pattern - Factory Pattern](https://www.tutorialspoint.com/design_pattern/factory_pattern.htm)
