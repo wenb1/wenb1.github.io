@@ -6,8 +6,6 @@ description: 讲解Java中的Set
 keywords: Java, collections, 集合，set
 ---
 
-# Set
-
 Set类似于一个罐子，我们只要把元素扔进去就能存起来，要注意的是set不允许有相同的元素而且没有顺序可言。比如一个装满糖的罐子，我们不能给这些罐子里的糖排一个顺序。虽然表面上没有顺序，但是Set有一个内部的顺序要维护，对于Integer和String这类Java定义好的类，我们不需要担心，但是如果你自己要定义一个类出来，就需要注意set是如何维护这个顺序的了。不同的set有不同的维护方法，因此，不同的set实现类不仅有不同的方法，在能放进去的对象类型也有所不同。
 
 [Set的官方文档](https://docs.oracle.com/javase/8/docs/api/java/util/Set.html)
