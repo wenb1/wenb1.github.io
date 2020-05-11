@@ -6,11 +6,15 @@ description: 讲解Java中的Set
 keywords: Java, collections, 集合，set
 ---
 
-Set类似于一个罐子，我们只要把元素扔进去就能存起来，要注意的是set不允许有相同的元素而且没有顺序可言。比如一个装满糖的罐子，我们不能给这些罐子里的糖排一个顺序。
+Set类似于一个罐子，我们只要把元素扔进去就能存起来，但要注意的是set不允许有相同的元素而且没有顺序可言。比如一个装满糖的罐子，我们不能给这些罐子里的糖排一个顺序。
 
 虽然表面上没有顺序，但是Set有一个内部的顺序要维护，对于Integer和String这类Java定义好的类，我们不需要担心，但是如果你自己要定义一个类出来，就需要注意set是如何维护这个顺序的了。不同的set有不同的维护方法，因此，不同的set实现类不仅有不同的方法，在能放进去的对象类型也有所不同。
 
-[Set的官方文档](https://docs.oracle.com/javase/8/docs/api/java/util/Set.html)
+# 1. Set简介
+
+先把set的[Set的官方文档](https://docs.oracle.com/javase/8/docs/api/java/util/Set.html)拿出来，从文档里我们能看到给set的定义是 A collection that contains no duplicate elements. More formally, sets contain no pair of elements `e1` and `e2` such that `e1.equals(e2)`, and at most one null element. As implied by its name, this interface models the mathematical *set* abstraction.
+
+Set具体有三个实现类，HashSet，TreeSet，LinkedHashSet，它们的特点如下：
 
 | Set (interface) | Each element that you add to the Set must be unique; otherwise, the Set doesn’t add the duplicate element. Elements added to a Set must at least define equals( ) to establish object uniqueness. Set has exactly the same interface as Collection. The Set interface does not guarantee that it will maintain its elements in any particular order. |
 | --------------- | ------------------------------------------------------------ |
@@ -20,9 +24,7 @@ Set类似于一个罐子，我们只要把元素扔进去就能存起来，要�
 
 如果没有其它约束条件，一般使用HashSet，因为它的速度比较快。
 
-哈希算法和hashCode()的使用会在后面讲述。
-
-Set的使用：
+Set的一般使用：
 
 ```java
 class SetType {
@@ -98,7 +100,137 @@ java.lang.ClassCastException: HashType cannot be cast to java.lang.Comparable
 
 ```
 
-## 特殊的SortedSet：
+# 2. Set各种实现类
+
+## 2.1 HashSet详解
+
+先说说HashSet的构造方法:
+
+```java
+private transient HashMap<E,Object> map;
+
+/**
+     * Constructs a new, empty set; the backing <tt>HashMap</tt> instance has
+     * default initial capacity (16) and load factor (0.75).
+     */
+    public HashSet() {
+        map = new HashMap<>();
+    }
+
+    /**
+     * Constructs a new set containing the elements in the specified
+     * collection.  The <tt>HashMap</tt> is created with default load factor
+     * (0.75) and an initial capacity sufficient to contain the elements in
+     * the specified collection.
+     *
+     * @param c the collection whose elements are to be placed into this set
+     * @throws NullPointerException if the specified collection is null
+     */
+    public HashSet(Collection<? extends E> c) {
+        map = new HashMap<>(Math.max((int) (c.size()/.75f) + 1, 16));
+        addAll(c);
+    }
+
+    /**
+     * Constructs a new, empty set; the backing <tt>HashMap</tt> instance has
+     * the specified initial capacity and the specified load factor.
+     *
+     * @param      initialCapacity   the initial capacity of the hash map
+     * @param      loadFactor        the load factor of the hash map
+     * @throws     IllegalArgumentException if the initial capacity is less
+     *             than zero, or if the load factor is nonpositive
+     */
+    public HashSet(int initialCapacity, float loadFactor) {
+        map = new HashMap<>(initialCapacity, loadFactor);
+    }
+
+    /**
+     * Constructs a new, empty set; the backing <tt>HashMap</tt> instance has
+     * the specified initial capacity and default load factor (0.75).
+     *
+     * @param      initialCapacity   the initial capacity of the hash table
+     * @throws     IllegalArgumentException if the initial capacity is less
+     *             than zero
+     */
+    public HashSet(int initialCapacity) {
+        map = new HashMap<>(initialCapacity);
+    }
+
+    /**
+     * Constructs a new, empty linked hash set.  (This package private
+     * constructor is only used by LinkedHashSet.) The backing
+     * HashMap instance is a LinkedHashMap with the specified initial
+     * capacity and the specified load factor.
+     *
+     * @param      initialCapacity   the initial capacity of the hash map
+     * @param      loadFactor        the load factor of the hash map
+     * @param      dummy             ignored (distinguishes this
+     *             constructor from other int, float constructor.)
+     * @throws     IllegalArgumentException if the initial capacity is less
+     *             than zero, or if the load factor is nonpositive
+     */
+    HashSet(int initialCapacity, float loadFactor, boolean dummy) {
+        map = new LinkedHashMap<>(initialCapacity, loadFactor);
+    }
+```
+
+可以看到HashSet有许多构造方法，不过底层还是用了HashMap来实现。HashSet保证去重的方法是把每一个要添加的元素作为HashMap的键值(key)插入到HashMap中，因为HashMap不能有重复的键值，自然保证了HashSet中元素的唯一。
+
+再来看看HashSet的添加方法：
+
+```java
+// Dummy value to associate with an Object in the backing Map
+    private static final Object PRESENT = new Object();
+    
+/**
+     * Adds the specified element to this set if it is not already present.
+     * More formally, adds the specified element <tt>e</tt> to this set if
+     * this set contains no element <tt>e2</tt> such that
+     * <tt>(e==null&nbsp;?&nbsp;e2==null&nbsp;:&nbsp;e.equals(e2))</tt>.
+     * If this set already contains the element, the call leaves the set
+     * unchanged and returns <tt>false</tt>.
+     *
+     * @param e element to be added to this set
+     * @return <tt>true</tt> if this set did not already contain the specified
+     * element
+     */
+    public boolean add(E e) {
+        return map.put(e, PRESENT)==null;
+    }
+```
+
+我们可以看到，在HashSet里添加值的时候，要添加的值作为键存储在HashMap中，而HashMap真正的值却是一个没有意义的object对象。
+
+我们也可以从添加方法中理解官方定义中说null值可以被存在HashSet中，但是只允许存储一个。
+
+HashSet的删除方法：
+
+```java
+// Dummy value to associate with an Object in the backing Map
+    private static final Object PRESENT = new Object();
+
+/**
+     * Removes the specified element from this set if it is present.
+     * More formally, removes an element <tt>e</tt> such that
+     * <tt>(o==null&nbsp;?&nbsp;e==null&nbsp;:&nbsp;o.equals(e))</tt>,
+     * if this set contains such an element.  Returns <tt>true</tt> if
+     * this set contained the element (or equivalently, if this set
+     * changed as a result of the call).  (This set will not contain the
+     * element once the call returns.)
+     *
+     * @param o object to be removed from this set, if present
+     * @return <tt>true</tt> if the set contained the specified element
+     */
+    public boolean remove(Object o) {
+        return map.remove(o)==PRESENT;
+    }
+```
+
+HashSet的删除方法也是调用HashMap的删除方法来完成删除的。
+
+## 2.1 TreeSet详解
+
+## 2.4 特殊的SortedSet：
 
 SortedSet比较特殊，它继承了Set接口，不同的是，它的元素是有序的，所以它能实现一些普通set无法实现的功能。SortedSet的实现类就是TreeSet。
 
