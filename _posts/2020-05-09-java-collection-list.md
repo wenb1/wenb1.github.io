@@ -30,7 +30,7 @@ Java的集合是非常重要的概念之一，Java本身的collection库和map�
 
 [map官方文档](https://docs.oracle.com/javase/8/docs/api/java/util/Map.html)
 
-# 3. List
+# 3. List介绍
 
 list接口继承了collection接口，并提供了一些具体的实现类，比如LinkedList和ArrayList。一般list的使用非常简单，用add()插入对象，用get()取出对象，用iterator()创建一个iterator。下面，我们具体讲解LinkedList和ArrayList。
 
