@@ -1,8 +1,10 @@
+---
 layout: post
 title: Java的集合(collections)之Set
 categories: Java
 description: 讲解Java中的Set
 keywords: Java, collections, 集合，set
+---
 
 # Set
 
