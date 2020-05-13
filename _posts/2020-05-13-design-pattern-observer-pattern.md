@@ -14,7 +14,7 @@ keywords: DesignPattern, 设计模式
 
 # 1. 观察者模式实现
 
-![观察者模式示意图](/images/posts/designpattern/observer_pattern_diagram.PNG)
+![观察者模式示意图](/images/posts/designpattern/observer_pattern_diagram.png)
 
 其中，Subject类是主题，它把所有对观察者对象的引用文件存在了一个集合里，每个主题都可以有任何数量的观察者。抽象主题提供了一个接口，可以增加和删除观察者对象；Observer类是抽象观察者，为所有的具体观察者定义一个接口，在得到主题的通知时更新自己；ConcreteSubject类是具体主题，将有关状态存入具体观察者对象，在具体主题内部状态改变时，给所有登记过的观察者发出通知；ConcreteObserver是具体观察者，实现抽象观察者角色所要求的更新接口，以便使本身的状态与主题的状态相协同。
 
