@@ -19,97 +19,12 @@ Map实际是存储一系列键值对映射的集合，通过键，我们能找�
 
 # 2. Map的实现类
 
+Map的类继承关系如下：
+
+[map结构图](/images/posts/java/collection_2.png)
+
 ## 2.1 HashMap
 
-从源码我们能看到底层是维护一个`Node<K,V>[]`类型的变量`table`，`table`实际是一个数组，里面存放的是`Node<K,V>`对像，而`Node<K,V>`对象可以作为节点连接其他`Node<K,V>`节点形成一个链表。所以说HashMap的实现方式其实是数组+链表的形式。
+直接贴一篇美团技术团队的博客，从源码分析，非常详细。
 
-### 2.1.1 HashMap的构造方法
-
-```java
-/**
-     * The next size value at which to resize (capacity * load factor).
-     *
-     * @serial
-     */
-    // (The javadoc description is true upon serialization.
-    // Additionally, if the table array has not been allocated, this
-    // field holds the initial array capacity, or zero signifying
-    // DEFAULT_INITIAL_CAPACITY.)
-    int threshold;
-
-    /**
-     * The load factor for the hash table.
-     *
-     * @serial
-     */
-    final float loadFactor;
-/**
-     * The maximum capacity, used if a higher value is implicitly specified
-     * by either of the constructors with arguments.
-     * MUST be a power of two <= 1<<30.
-     */
-    static final int MAXIMUM_CAPACITY = 1 << 30;
-
-    /**
-     * The load factor used when none specified in constructor.
-     */
-    static final float DEFAULT_LOAD_FACTOR = 0.75f;
-/**
-     * Constructs an empty <tt>HashMap</tt> with the specified initial
-     * capacity and load factor.
-     *
-     * @param  initialCapacity the initial capacity
-     * @param  loadFactor      the load factor
-     * @throws IllegalArgumentException if the initial capacity is negative
-     *         or the load factor is nonpositive
-     */
-    public HashMap(int initialCapacity, float loadFactor) {
-        if (initialCapacity < 0)
-            throw new IllegalArgumentException("Illegal initial capacity: " +
-                                               initialCapacity);
-        if (initialCapacity > MAXIMUM_CAPACITY)
-            initialCapacity = MAXIMUM_CAPACITY;
-        if (loadFactor <= 0 || Float.isNaN(loadFactor))
-            throw new IllegalArgumentException("Illegal load factor: " +
-                                               loadFactor);
-        this.loadFactor = loadFactor;
-        this.threshold = tableSizeFor(initialCapacity);
-    }
-
-    /**
-     * Constructs an empty <tt>HashMap</tt> with the specified initial
-     * capacity and the default load factor (0.75).
-     *
-     * @param  initialCapacity the initial capacity.
-     * @throws IllegalArgumentException if the initial capacity is negative.
-     */
-    public HashMap(int initialCapacity) {
-        this(initialCapacity, DEFAULT_LOAD_FACTOR);
-    }
-
-    /**
-     * Constructs an empty <tt>HashMap</tt> with the default initial capacity
-     * (16) and the default load factor (0.75).
-     */
-    public HashMap() {
-        this.loadFactor = DEFAULT_LOAD_FACTOR; // all other fields defaulted
-    }
-
-    /**
-     * Constructs a new <tt>HashMap</tt> with the same mappings as the
-     * specified <tt>Map</tt>.  The <tt>HashMap</tt> is created with
-     * default load factor (0.75) and an initial capacity sufficient to
-     * hold the mappings in the specified <tt>Map</tt>.
-     *
-     * @param   m the map whose mappings are to be placed in this map
-     * @throws  NullPointerException if the specified map is null
-     */
-    public HashMap(Map<? extends K, ? extends V> m) {
-        this.loadFactor = DEFAULT_LOAD_FACTOR;
-        putMapEntries(m, false);
-    }
-```
-
-从源码，我们能看到第一个构造方法`public HashMap(int initialCapacity, float loadFactor)`需要初始容量和负载作为参数初始化一个HashMap。`public HashMap(int initialCapacity)`则是调用第一构造方法并用默认的负载作为参数。无参构造方法`public HashMap()`则是使用默认的容量，并直接给`loadFactor`赋值一个默认的负载。`public HashMap(Map<? extends K, ? extends V> m)`这个构造方法的参数是另一个map，并把这个map里的键值对放到要创建的新map中。
-
-2.1.1 HashMap的构造方法
+[Java 8系列之重新认识HashMap](https://tech.meituan.com/2016/06/24/java-hashmap.html)
