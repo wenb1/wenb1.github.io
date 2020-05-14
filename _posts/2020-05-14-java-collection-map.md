@@ -21,7 +21,7 @@ Map实际是存储一系列键值对映射的集合，通过键，我们能找�
 
 Map的类继承关系如下：
 
-[map结构图](/images/posts/java/collection_2.png)
+![map结构图](/images/posts/java/collection_2.png)
 
 ## 2.1 HashMap
 
