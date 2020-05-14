@@ -1,6 +1,6 @@
 ---
 layout: post
-title: 《深入浅出 Springboot 2.x》读书笔记
+title: 《深入浅出 Springboot 2.x》第6章 聊聊数据库事务处理
 categories: Springboot
 description: 了解springboot的事务
 keywords: Springboot, Transaction, 事务
