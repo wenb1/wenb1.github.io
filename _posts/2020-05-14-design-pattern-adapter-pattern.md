@@ -121,3 +121,11 @@ public class PlayerAdapter implement Player{
 ## 2.3 适配器模式的缺点
 
 - 对于Java、C#等不支持多重继承的语言，一次最多只能适配一个适配者类，而且目标抽象类只能为接口，不能为类，其使用有一定的局限性，不能将一个适配者类和他的子类同时适配到目标接口。
+
+  
+
+**参考文章**
+
+[浅谈Java适配器模式 (键盘上的麒麟臂)](https://www.jianshu.com/p/b3a00cca10de)
+
+[适配器模式(三种)简单使用 (Must_Do_Kaihong)](https://blog.csdn.net/u012359453/article/details/79165080)
