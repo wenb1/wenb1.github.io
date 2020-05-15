@@ -29,6 +29,10 @@ Map的类继承关系如下：
 
 [Java 8系列之重新认识HashMap](https://tech.meituan.com/2016/06/24/java-hashmap.html)
 
+另一篇从源码分析的博客
+
+[Java HashMap工作原理及实现]([http://yikun.github.io/2015/04/01/Java-HashMap%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86%E5%8F%8A%E5%AE%9E%E7%8E%B0/](http://yikun.github.io/2015/04/01/Java-HashMap工作原理及实现/))
+
 ## 2.2 LinkedHashMap
 
 LinkedHashMap继承于HashMap，LinkedHashMap和HashMap的区别是，LinkedHashMap是有序的，而HashMap是无序的，LinkedHashMap的默认顺序是插入顺序。
