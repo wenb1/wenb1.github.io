@@ -39,7 +39,7 @@ Java内置了三个注解可供使用
 
 # 3. 定义一个注解
 
-我们可以通过`@interface`关键字来创建一个自己的注解
+我们可以通过`@interface`关键字来创建一个自己的注解，注意：注解是不支持继承的，因此不能使用关键字extends来继承某个@interface
 
 ```java
 @Target(ElementType.METHOD)
@@ -128,6 +128,8 @@ public @interface Test(){}
 
 注解的属性其实和类中定义的变量有异曲同工之处，只是注解中的变量都是成员变量（属性），并且注解中是没有方法的，只有成员变量，变量名就是使用注解括号中对应的参数名，变量返回值注解括号中对应参数类型。我们可以给属性规定一个默认值。
 
+编译器对元素的默认值有些挑剔。首先，元素不能有不确定的值。也就是说，元素必须要么具有默认值，要么在使用注解时提供元素的值。其次，对于非基本类型的元素，无论是在源代码中声明，还是在注解接口中定义默认值，都不能以null作为值，这就是限制，没有什么利用可言，但造成一个元素的存在或缺失状态，因为每个注解的声明中，所有的元素都存在，并且都具有相应的值，为了绕开这个限制，只能定义一些特殊的值，例如空字符串或负数，表示某个元素不存在。
+
 ```java
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
@@ -188,3 +190,13 @@ public interface Annotation {
 - 编译阶段时的处理： 软件工具可以用来利用注解信息来生成代码、Html文档或者做其它相应处理。
 - 运行时的处理： 某些注解可以在程序运行的时候接受代码的提取
   值得注意的是，注解不是代码本身的一部分。
+
+**参考文章**
+
+[Java 注解完全解析 (若丨寒)](https://www.jianshu.com/p/9471d6bcf4cf)
+
+[java注解-最通俗易懂的讲解 (Tanyboye)](https://blog.csdn.net/qq1404510094/article/details/80577555)
+
+[深入理解Java注解类型(@Annotation) (zajian_)](https://blog.csdn.net/javazejian/article/details/71860633)
+
+[Java注解-元数据、注解分类、内置注解和自定义注解 (乐字节)](https://segmentfault.com/a/1190000019887623)
