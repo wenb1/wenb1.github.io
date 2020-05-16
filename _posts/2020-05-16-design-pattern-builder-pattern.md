@@ -61,7 +61,7 @@ public class Computer {
 }
 ```
 
-## 1.2.2 创建ComputerBuilder抽象类
+### 1.2.2 创建ComputerBuilder抽象类
 
 ```java
 public abstract class ComputerBuilder {
@@ -159,7 +159,7 @@ public class BuilderDemo {
 
 可以看到，director的实际作用是利用builder组装computer，而最后要获得的对象是通过builder获得的。
 
-# 2. 创建者模式分析
+# 2. 建造者模式分析
 
 ## 2.1 优点
 
@@ -186,3 +186,9 @@ public class BuilderDemo {
 - Builder模式不适合创建差异性很大的产品类，产品内部变化复杂，会导致需要定义很多具体建造者类实现变化，增加项目中类的数量，增加系统的理解难度和运行成本
 
 - 需要生成的产品对象有复杂的内部结构，这些产品对象具备共性
+
+**参考文章**：
+
+[秒懂设计模式之建造者模式（Builder pattern）(shusheng007)](https://zhuanlan.zhihu.com/p/58093669)
+
+[一篇文章就彻底弄懂建造者模式(Builder Pattern) (大前端圈)](https://www.jianshu.com/p/3d1c9ffb0a28)
