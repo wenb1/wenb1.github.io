@@ -63,7 +63,7 @@ public class Computer {
 
 ## 1.2.2 创建ComputerBuilder抽象类
 
-```
+```java
 public abstract class ComputerBuilder {
 	public abstract void setUsbCount();
     public abstract void setKeyboard();
