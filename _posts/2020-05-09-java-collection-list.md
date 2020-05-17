@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Java集合(collections)之List
+title: Java集合(Collections)之List
 categories: Java
 description: 讲解Java中的List
 keywords: Java, collections, 集合，list

@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Java集合(collections)之Set
+title: Java集合(Collections)之Set
 categories: Java
 description: 讲解Java中的Set
 keywords: Java, collections, 集合，set
