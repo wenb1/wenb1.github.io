@@ -112,7 +112,7 @@ private int dev.wenbo.reflection.CollegeStudent.age
 - `getType()`：返回字段类型，也是一个`Class`实例，例如，`String.class`；
 - `getModifiers()`：返回字段的修饰符，它是一个`int`，不同的bit表示不同的含义。
 
-### 3.1.2 获取属性字段值
+### 3.1.3 获取属性字段值
 
 我们可以更进一步，通过`Field`变量来获得属性值：
 
