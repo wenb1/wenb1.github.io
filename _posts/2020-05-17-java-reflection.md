@@ -44,7 +44,7 @@ Class clazz = new Class(String);
 
 # 3. 反射的使用
 
-## 3.1 通过反射获取属性字段
+## 3.1 通过反射获取属性
 
 ### 3.1.1 获取Class对象
 
@@ -71,7 +71,7 @@ Class c3 = Class.forName("Person");
 
 前两种必须明确Person类型，后面是指定这种类型的字符串就行，这种扩展更强，我不需要知道你的类，我只提供字符串，按照配置文件加载就可以了。
 
-### 3.1.2 获取属性字段
+### 3.1.2 获取属性
 
 ```java
 public class ReflectionDemo {
@@ -112,7 +112,7 @@ private int dev.wenbo.reflection.CollegeStudent.age
 - `getType()`：返回字段类型，也是一个`Class`实例，例如，`String.class`；
 - `getModifiers()`：返回字段的修饰符，它是一个`int`，不同的bit表示不同的含义。
 
-### 3.1.3 获取属性字段值
+### 3.1.3 获取属性值
 
 我们可以更进一步，通过`Field`变量来获得属性值：
 
@@ -152,3 +152,142 @@ private int dev.wenbo.reflection.CollegeStudent.age
 ```
 
 因为我们把`age`定义为`private`变量，所以我们通过`Field`获得这个变量之后要使用`setAccessible(true)`方法才能得到这个变量定义的值，也就是23。
+
+### 3.1.4 修改属性值
+
+通过Field实例既然可以获取到指定实例的字段值，自然也可以设置字段的值。
+
+设置字段值是通过`Field.set(Object, Object)`实现的，其中第一个`Object`参数是指定的实例，第二个`Object`参数是待修改的值。
+
+```java
+public class ReflectionDemo {
+
+	public static void main(String[] args) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, InstantiationException {
+		Class collegeStudentClass = CollegeStudent.class;
+		//获取继承的public属性
+		System.out.println(collegeStudentClass.getField("gender"));
+		//获取private属性
+		System.out.println(collegeStudentClass.getDeclaredField("age"));
+		//获取类中定义的public属性
+		System.out.println(collegeStudentClass.getField("studentId"));
+		//获取所有属性
+		Field[] fields = collegeStudentClass.getDeclaredFields();
+		for(Field field:fields) {
+			System.out.println(field);
+		}
+		//获取属性值
+		CollegeStudent c = (CollegeStudent)collegeStudentClass.newInstance();
+		Field ageField = collegeStudentClass.getDeclaredField("age");
+		ageField.setAccessible(true);
+		int age1 = (int) ageField.get(c);
+		System.out.println(age1);
+		//修改属性值
+		ageField.set(c, 99);
+		System.out.println(ageField.get(c));
+	}
+
+}
+```
+
+## 3.2 通过反射调用方法
+
+类似通过反射获取属性的方式，我们可以使用反射获得方法信息。
+
+### 3.2.1 获取方法
+
+`Class`类通过以下几个方法获得`Method`：
+
+- `Method getMethod(name, Class...)`：获取某个`public`的`Method`（包括父类）
+- `Method getDeclaredMethod(name, Class...)`：获取当前类的某个`Method`（不包括父类）
+- `Method[] getMethods()`：获取所有`public`的`Method`（包括父类）
+- `Method[] getDeclaredMethods()`：获取当前类的所有`Method`（不包括父类）
+
+```java
+public class ReflectionDemo {
+
+	public static void main(String[] args) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, InstantiationException, NoSuchMethodException {
+		Class collegeStudentClass = CollegeStudent.class;
+		//获取继承的public属性
+		System.out.println(collegeStudentClass.getField("gender"));
+		//获取private属性
+		System.out.println(collegeStudentClass.getDeclaredField("age"));
+		//获取类中定义的public属性
+		System.out.println(collegeStudentClass.getField("studentId"));
+		//获取所有属性
+		Field[] fields = collegeStudentClass.getDeclaredFields();
+		for(Field field:fields) {
+			System.out.println(field);
+		}
+		//获取属性值
+		CollegeStudent c = (CollegeStudent)collegeStudentClass.newInstance();
+		Field ageField = collegeStudentClass.getDeclaredField("age");
+		ageField.setAccessible(true);
+		int age1 = (int) ageField.get(c);
+		System.out.println(age1);
+		//修改属性值
+		ageField.set(c, 99);
+		System.out.println(ageField.get(c));
+
+		//获得方法
+		Method[] methods = collegeStudentClass.getDeclaredMethods();
+		for(Method method:methods) {
+			System.out.println(method);
+		}
+		//获得包括父类的方法
+		methods = collegeStudentClass.getMethods();
+		for(Method method:methods) {
+			System.out.println(method);
+		}
+		//获得talk方法
+		Method talkMethod = collegeStudentClass.getMethod("talk");
+		System.out.println(talkMethod);
+		//获得private的watchTV方法
+		Method watchTVMethod = collegeStudentClass.getDeclaredMethod("watchTV", String.class);
+		System.out.println(watchTVMethod);
+	}
+
+}
+```
+
+一个`Method`对象包含一个方法的所有信息：
+
+- `getName()`：返回方法名称，例如：`"getScore"`；
+- `getReturnType()`：返回方法返回值类型，也是一个Class实例，例如：`String.class`；
+- `getParameterTypes()`：返回方法的参数类型，是一个Class数组，例如：`{String.class, int.class}`；
+- `getModifiers()`：返回方法的修饰符，它是一个`int`，不同的bit表示不同的含义。
+
+### 3.2.2 利用反射调用方法
+
+当我们获取到一个`Method`对象时，就可以对它进行调用。对`Method`实例调用`invoke`就相当于调用该方法，`invoke`的第一个参数是对象实例，即在哪个实例上调用该方法，后面的可变参数要与方法参数一致，否则将报错。
+
+```java
+public class Main {
+    public static void main(String[] args) throws Exception {
+        // String对象:
+        String s = "Hello world";
+        // 获取String substring(int)方法，参数为int:
+        Method m = String.class.getMethod("substring", int.class);
+        // 在s对象上调用该方法并获取结果:
+        String r = (String) m.invoke(s, 6);
+        // 打印调用结果:
+        System.out.println(r);
+    }
+}
+```
+
+如果获取到的Method表示一个静态方法，调用静态方法时，由于无需指定实例对象，所以`invoke`方法传入的第一个参数永远为`null`。
+
+```java
+public class Main {
+    public static void main(String[] args) throws Exception {
+        // 获取Integer.parseInt(String)方法，参数为String:
+        Method m = Integer.class.getMethod("parseInt", String.class);
+        // 调用该静态方法并获取结果:
+        Integer n = (Integer) m.invoke(null, "12345");
+        // 打印调用结果:
+        System.out.println(n);
+    }
+}
+```
+
+注意：使用反射调用方法时，仍然遵循多态原则：即总是调用实际类型的覆写方法（如果存在）。
