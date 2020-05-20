@@ -51,7 +51,7 @@ public class AppConfig{
 }
 ```
 
-@Configuration 代表这是一个Java 配置文件， Sprin g 的容器会根据它来生成IoC 容器去装配Bean; @Bean 代表将initUser方法返回的POJO 装配到IoC 容器中，而其属性name 定义这个Bean 的名称，如果没有配置它，则将方法名称“ initUser ”作为Bean 的名称保存到S pring IoC 容器中。
+`@Configuration`代表这是一个Java配置文件，Spring的容器会根据它来生成IoC 容器去装配Bean; `@Bean`代表将initUser方法返回的POJO装配到IoC 容器中，而其属性name 定义这个Bean的名称，如果没有配置它，则将方法名称“ initUser ”作为Bean的名称保存到Spring IoC 容器中。
 
 做好了这些，就可以使用AnnotationConfigApplicationContext来构建自己的IoC 容器：
 
@@ -67,13 +67,13 @@ public class IocTest {
 
 代码中将Java配置文件AppConfig传递给AnnotationConfigApplicationContext的构造方法，这样它就能够读取配置了。然后将配置里面的Bean装配到IoC容器中，于是可以使用getBean方法获取对应的POJO 。
 
-当然这只是很简单的方法，而注解@Bean也不是唯一创建Bean的方法，还有其他的方法可以让IoC容器装配Bean，而且Bean之间还有依赖的关系需要进一步处理。
+当然这只是很简单的方法，而注解`@Bean`也不是唯一创建Bean的方法，还有其他的方法可以让IoC容器装配Bean，而且Bean之间还有依赖的关系需要进一步处理。
 
 ## 3.2 装配你的Bean
 
 ### 3.2.1 通过扫描装配你的Bean
 
-如果一个个的Bean使用注解@Bean注入Spring loC容器中，那将是一件很麻烦的事情。好在Spring还允许我们进行扫描装配Bean到loC容器中，对于扫描装配而言使用的注解是@Component和@ComponentScan。@Component是标明l哪个类被扫描进入Spring IoC容器，而@ComponentScan则是标明采用何种策略去扫描装配Bean。
+如果一个个的Bean使用注解`@Bean`注入Spring loC容器中，那将是一件很麻烦的事情。好在Spring还允许我们进行扫描装配Bean到loC容器中，对于扫描装配而言使用的注解是`@Component`和`@ComponentScan`。`@Component`是标明哪个类被扫描进入Spring IoC容器，而`@ComponentScan`则是标明采用何种策略去扫描装配Bean。
 
 ```java
 @Component("user")
@@ -96,8 +96,6 @@ public class AppConfig{
 }
 ```
 
-这里加入了@ComponentScan，意味着它会进行扫描，但是它只会扫描类AppConfig所在的当前包和其子包。@ComponentScan还允许我们自定义扫描的包。
-
 测试：
 
 ```java
@@ -109,3 +107,122 @@ public class IocTest {
     }
 }
 ```
+
+这里加入了`@ComponentScan`，意味着它会进行扫描，但是它只会扫描类AppConfig所在的当前包和其子包。`@ComponentScan`还允许我们自定义扫描的包。
+
+`@ComponentScan`可以通过配置项basePackages定义扫描的包名，在没有定义的情况下，它只会扫描当前包和其子包下的路径：还可以通过basePackageClasses定义扫描的类；其中还有includeFilters和excludeFilters，includeFilters是定义满
+足过滤器(Filter)条件的Bean才去扫描， excludeFilters则是排除过滤器条件的Bean，它们都需要通过一个注解@Filter 去定义，它有一个type类型，这里可以定义为注解或者正则式等类型。
+
+为了不装配特定的Bean，我们可以使用excludeFilters配置特定的Bean不会被装入IoC：
+
+```java
+@ComponentScan(basePackages = "dev.wenbo.learnspring", excludeFilters = {@ComponentScan.Filter(classes = {Service.class})})
+```
+
+### 3.2.2 定义第三方Bean
+
+现实的Java的应用往往需要引入许多来自第三方的包， 并且很有可能希望把第三方包的类对象也放入到Spring IoC容器中，这时＠Bean注解就可以发挥作用了。
+
+## 3.3 依赖注入
+
+Bean之间的依赖，在Spring IoC的概念中，我们称为依赖注入（ Dependency Injection）。
+
+例子：
+
+```java
+public interface Animal {
+    public void use();
+}
+
+public interface Person {
+    public void service();
+    public void setAnimal(Animal animal);
+}
+```
+
+```java
+@Component
+public class Dog implements Animal {
+    @Override
+    public void use() {
+        System.out.println("狗是人类的朋友");
+    }
+}
+
+@Component
+public class APerson implements Person {
+	
+    //通过注解将Dog注入到APerson里
+    @Autowired
+    private Animal animal;
+
+    @Override
+    public void service() {
+        this.animal.use();
+    }
+
+    @Override
+    public void setAnimal(Animal animal) {
+        this.animal=animal;
+    }
+}
+```
+
+测试：
+
+```java
+@Configuration
+@ComponentScan
+public class AppConfig {
+
+}
+
+public class IocTest {
+    public static void main(String[] args) {
+        ApplicationContext ctx = new AnnotationConfigApplicationContext(AppConfig.class);
+        Person person = ctx.getBean(APerson.class);
+        person.service();
+    }
+}
+```
+
+### 3.3.1 注解@Autowired
+
+`@Autowired`是我们使用得最多的注解之一， 因此在这里需要进一步地探讨它。它注入的机制最基本的一条是根据类型（ by type ）， 我们回顾IoC容器的顶级接口BeanFactory，就可以知道IoC 容器是通过getBean方法获取对应Bean的，而getBean又支持根据类型（ by type ）或者根据名称（ by name ）。
+
+如果我们再创建一个如下所示的类：
+
+```java
+@Component
+public class Cat implements Animal {
+    @Override
+    public void use() {
+        System.out.println("猫很可爱");
+    }
+}
+```
+
+这时，我们有两个具体类实现了Animal接口，到运行的时候，IoC不知道应该注入Dog类还是Cat类。如果我们把代码中的animal变量重新命名为dog的话，问题就解决了。
+
+```java
+@Component
+public class APerson implements Person {
+
+    @Autowired
+    private Animal dog;
+
+    @Override
+    public void service() {
+        this.dog.use();
+    }
+
+    @Override
+    public void setAnimal(Animal animal) {
+        this.dog=animal;
+    }
+}
+```
+
+这里， 我们只是将属性的名称从animal修改为了dog，那么我们再测试的时候，你可以看到是采用狗来提供服务的。那是因为@Autowired提供这样的规则， 首先它会根据类型找到对应的Bean，如果对应类型的Bean不是唯一的，那么它会根据其属性名称和Bean的名称进行匹配。如果匹配得上，就会使用该Bean，如果还无法匹配，就会抛出异常。
+
+这里还要注意的是@Autowired是一个默认必须找到对应Bean的注解，如果不能确定其标注属性一定会存在并且允许这个被标注的属性为null ，那么你可以配置@Autowired属性required为false。
