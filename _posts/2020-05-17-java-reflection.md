@@ -290,4 +290,122 @@ public class Main {
 }
 ```
 
+如果调用非`public`方法，们虽然可以通过`Class.getDeclaredMethod()`获取该方法实例，但直接对其调用将得到一个`IllegalAccessException`。为了调用非`public`方法，我们通过`Method.setAccessible(true)`允许其调用。`setAccessible(true)`可能会失败。如果JVM运行期存在`SecurityManager`，那么它会根据规则进行检查，有可能阻止`setAccessible(true)`。
+
+```java
+public class ReflectionDemo {
+
+	public static void main(String[] args) throws Exception {
+		Class collegeStudentClass = CollegeStudent.class;
+		CollegeStudent c = (CollegeStudent)collegeStudentClass.newInstance();
+		//获得private的watchTV方法
+		Method watchTVMethod = collegeStudentClass.getDeclaredMethod("watchTV", String.class);
+		watchTVMethod.setAccessible(true);
+		watchTVMethod.invoke(c, "CCTV");
+		System.out.println(watchTVMethod);
+	}
+
+}
+```
+
 注意：使用反射调用方法时，仍然遵循多态原则：即总是调用实际类型的覆写方法（如果存在）。
+
+## 3.3 调用构造方法
+
+### 3.3.1 调用Class.newInstance()构造实例
+
+在上面的例子中，我们使用了`CollegeStudent c  = (CollegeStudent)collegeStudentClass.newInstance()`来构造实例，实际上，这个方法不是万能的，它只能调用`public`的无参构造方法。如果构造方法带有参数，或者不是public，就无法直接通过`Class.newInstance()`来调用。
+
+### 3.3.2 调用任意构造方法
+
+为了调用任意的构造方法，Java的反射API提供了Constructor对象，它包含一个构造方法的所有信息，可以创建一个实例。
+
+通过Class实例获取Constructor的方法如下：
+
+- `getConstructor(Class...)`：获取某个`public`的`Constructor`；
+- `getDeclaredConstructor(Class...)`：获取某个`Constructor`；
+- `getConstructors()`：获取所有`public`的`Constructor`；
+- `getDeclaredConstructors()`：获取所有`Constructor`。
+
+注意`Constructor`总是当前类定义的构造方法，和父类无关，因此不存在多态的问题。
+
+调用非`public`的`Constructor`时，必须首先通过`setAccessible(true)`设置允许访问。`setAccessible(true)`可能会失败。
+
+## 3.4 通过反射获取继承关系
+
+### 3.4.1 获取父类Class
+
+```java
+public class ReflectionDemo {
+
+	public static void main(String[] args) throws Exception {
+		Class collegeStudentClass = CollegeStudent.class;
+		Class superClass = collegeStudentClass.getSuperclass();
+		System.out.println(superClass);
+		Class superClazz = superClass.getSuperclass();
+		System.out.println(superClazz);
+	}
+}
+
+```
+
+### 3.4.2 获取interface
+
+```java
+public class ReflectionDemo {
+
+	public static void main(String[] args) throws Exception {
+		Class collegeStudentClass = CollegeStudent.class;
+		Class[] interFace = collegeStudentClass.getInterfaces();
+		for (Class i : interFace) {
+            System.out.println(i);
+        }
+	}
+}
+```
+
+`getInterfaces()`只返回当前类直接实现的接口类型，并不包括其父类实现的接口类型。
+
+此外，对所有`interface`的`Class`调用`getSuperclass()`返回的是`null`，获取接口的父接口要用`getInterfaces()`。
+
+### 3.4.3 继承关系
+
+当我们判断一个实例是否是某个类型时，正常情况下，使用`instanceof`操作符。
+
+```java
+Object n = Integer.valueOf(123);
+boolean isDouble = n instanceof Double; // false
+boolean isInteger = n instanceof Integer; // true
+boolean isNumber = n instanceof Number; // true
+boolean isSerializable = n instanceof java.io.Serializable; // true
+```
+
+# 4. 泛型擦除
+
+程序编译后产生的`.class`文件中是没有泛型约束的，这种现象我们称为泛型的擦除。那么，我们可以通过反射技术，来完成向有泛型约束的集合中，添加任意类型的元素。
+
+```java
+public class Demo {
+	public static void main(String[] args) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		ArrayList<String> arrayList = new ArrayList();
+		arrayList.add("hello");
+		arrayList.add("world");
+		
+		Class cls = arrayList.getClass();
+		Method method = cls.getMethod("add", Object.class);
+		method.invoke(arrayList, 5);
+		
+		for(Object o:arrayList) {
+			System.out.println(o);
+		}
+	}
+}
+```
+
+**参考文章**
+
+[廖雪峰的官方网站](https://www.liaoxuefeng.com/wiki/1252599548343744/1255945147512512)
+
+[Java之反射 (菜鸟小于)](https://www.cnblogs.com/Young111/p/11330939.html)
+
+[Java 反射 -超详细讲解（附源码）(lililuni)](https://blog.csdn.net/lililuni/article/details/83449088)
