@@ -312,7 +312,7 @@ public class ReflectionDemo {
 
 ## 3.3 调用构造方法
 
-### 3.3.1 调用Class.newInstance()构造实例
+### 3.3.1 `Class.newInstance()`构造实例
 
 在上面的例子中，我们使用了`CollegeStudent c  = (CollegeStudent)collegeStudentClass.newInstance()`来构造实例，实际上，这个方法不是万能的，它只能调用`public`的无参构造方法。如果构造方法带有参数，或者不是public，就无法直接通过`Class.newInstance()`来调用。
 
@@ -333,7 +333,7 @@ public class ReflectionDemo {
 
 ## 3.4 通过反射获取继承关系
 
-### 3.4.1 获取父类Class
+### 3.4.1 获取父类`Class`
 
 ```java
 public class ReflectionDemo {
@@ -349,7 +349,7 @@ public class ReflectionDemo {
 
 ```
 
-### 3.4.2 获取interface
+### 3.4.2 获取`interface`
 
 ```java
 public class ReflectionDemo {
@@ -368,7 +368,7 @@ public class ReflectionDemo {
 
 此外，对所有`interface`的`Class`调用`getSuperclass()`返回的是`null`，获取接口的父接口要用`getInterfaces()`。
 
-### 3.4.3 继承关系
+### 3.4.3 获得继承关系
 
 当我们判断一个实例是否是某个类型时，正常情况下，使用`instanceof`操作符。
 
