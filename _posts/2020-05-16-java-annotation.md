@@ -141,9 +141,9 @@ public @interface Test {
 ### 3.2.1 注解的属性类型
 
 - 所有基本数据类型
-- String
-- enum
-- Class
+- `String`
+- `Enum`
+- `Class`
 - 注解
 - 以上类型的一维数组类型
 
@@ -169,7 +169,7 @@ public class TestDemo {
 
 # 4. 注解的本质
 
-注解的本质就是一个Annotation接口：
+注解的本质就是一个`Annotation`接口：
 
 ```java
 public interface Annotation {
@@ -182,12 +182,25 @@ public interface Annotation {
 }
 ```
 
-注解本身就是Annotation接口的子接口，也就是说注解中其实是可以有属性和方法，但是接口中的属性都是static final的，对于注解来说没什么意义，而我们定义接口的方法就相当于注解的属性，也就对应了前面说的为什么注解只有属性成员变量，其实他就是接口的方法，这就是为什么成员变量会有括号，不同于接口我们可以在注解的括号中给成员变量赋值。
+注解本身就是`Annotation`接口的子接口，也就是说注解中其实是可以有属性和方法，但是接口中的属性都是`static final`的，对于注解来说没什么意义，而我们定义接口的方法就相当于注解的属性，也就对应了前面说的为什么注解只有属性成员变量，其实他就是接口的方法，这就是为什么成员变量会有括号，不同于接口我们可以在注解的括号中给成员变量赋值。
 
-# 5. 注解的作用
+# 5. 注解与反射
+
+我们知道Java所有注解都继承了`Annotation`接口，也就是说，Java使用`Annotation`接口代表注解元素，该接口是所有`Annotation`类型的父接口。同时为了运行时能准确获取到注解的相关信息，Java在`java.lang.reflect`反射包下新增了`AnnotatedElement`接口，它主要用于表示目前正在 VM 中运行的程序中已使用注解的元素，通过该接口提供的方法可以利用反射技术地读取注解的信息，如反射包的`Constructor`类、`Field`类、`Method`类、`Package`类和`Class`类都实现了`AnnotatedElement`接口。
+
+下面是`AnnotatedElement`中相关的API方法，以上5个类都实现以下的方法：
+
+| 返回值                   | 方法名称                                                     | 说明                                                         |
+| ------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| `<A extends Annotation>` | `getAnnotation(Class<A> annotationClass)`                    | 该元素如果存在指定类型的注解，则返回这些注解，否则返回`null` |
+| `Annotation[]`           | `getAnnotations()`                                           | 返回此元素上存在的所有注解，包括从父类继承的                 |
+| `boolean`                | `isAnnotationPresent(Class<? extends Annotation> annotationClass)` | 如果指定类型的注解存在于此元素上，则返回`true`，否则返回`false` |
+| `Annotation[]`           | `getDeclaredAnnotations()`                                   | 返回直接存在于此元素上的所有注解，注意，不包括父类的注解，调用者可以随意修改返回的数组；这不会对其他调用者返回的数组产生任何影响，没有则返回长度为0的数组 |
+
+# 6. 注解的作用
 
 - 提供信息给编译器： 编译器可以利用注解来探测错误和警告信息
-- 编译阶段时的处理： 软件工具可以用来利用注解信息来生成代码、Html文档或者做其它相应处理。
+- 编译阶段时的处理： 软件工具可以用来利用注解信息来生成代码、HTML文档或者做其它相应处理。
 - 运行时的处理： 某些注解可以在程序运行的时候接受代码的提取
   值得注意的是，注解不是代码本身的一部分。
 
@@ -197,6 +210,6 @@ public interface Annotation {
 
 [java注解-最通俗易懂的讲解 (Tanyboye)](https://blog.csdn.net/qq1404510094/article/details/80577555)
 
-[深入理解Java注解类型(@Annotation) (zajian_)](https://blog.csdn.net/javazejian/article/details/71860633)
+[深入理解Java注解类型(@Annotation) (zejian_)](https://blog.csdn.net/javazejian/article/details/71860633)
 
 [Java注解-元数据、注解分类、内置注解和自定义注解 (乐字节)](https://segmentfault.com/a/1190000019887623)
