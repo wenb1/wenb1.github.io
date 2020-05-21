@@ -10,20 +10,20 @@ IoC 容器是Spring 的核心，可以说Spring 是一种基于IoC容器编程�
 
 # 第3章 全注解下的Spring IoC
 
-IoC是一种通过描述来生成或者获取对象的技术，而这个技术不是Spring甚至不是Java独有的。对于Java初学者更多的时候所熟悉的是使用new关键字来创建对象，而在Spring中则不是，它是通过描述来创建对象。只是Spring Boot并不建议使用XML，而是通过注解的描述生成对象。
+IoC是一种通过描述来生成或者获取对象的技术，而这个技术不是Spring甚至不是Java独有的。对于Java初学者更多的时候所熟悉的是使用`new`关键字来创建对象，而在Spring中则不是，它是通过描述来创建对象。只是Spring Boot并不建议使用XML，而是通过注解的描述生成对象。
 
 一个系统可以生成各种对象，井且这些对象都需要进行管理。还值得一提的是，对象之间并不是孤立的，它们之间还可能存在依赖的关系。在Spring中把每一个
-需要管理的对象称为Spring Bean （简称Bean ），而Spring管理这些Bean 的容器，被我们称为SpringIoC容器（或者简称IoC 容器） 。IoC 容器需要具备两个基本的功能：
+需要管理的对象称为Spring Bean（简称Bean ），而Spring管理这些Bean的容器，被我们称为SpringIoC容器（或者简称IoC 容器） 。IoC容器需要具备两个基本的功能：
 
-- 通过描述管理Bean ， 包括发布和获取Bean
-- 通过描述完成Bean 之间的依赖关系。
+- 通过描述管理Bean，包括发布和获取Bean
+- 通过描述完成Bean之间的依赖关系。
   
 
 ## 3.1 IoC容器简介
 
 Spring IoC容器是一个管理Bean的容器，在Spring的定义中，它要求所有的IoC 容器都需要实现接口BeanFactory，它是一个顶级容器接口。由于BeanFactory 的功能还不够强大，因此Spring在BeanFactory的基础上， 还设计了一个更为高级的接口ApplicationContext。它是BeanFactory的子接口之一， 在Spring的体系中BeanFactory和ApplicationContext是最为重要的接口设计，在现实中我们使用的大部分Spring IoC容器是ApplicationContext接口的实现类。
 
-在Spring Boot当中我们主要是通过注解来装配Bean到Spring IoC容器中，为了贴近Spring Boot的需要， 这里不再介绍与XML相关的IoC容器，而主要介绍一个基于注解的IoC容器，它就是AnnotationConfigApp licationContext，从名称就可以看出它是一个基于注解的IoC 容器。
+在Spring Boot当中我们主要是通过注解来装配Bean到Spring IoC容器中，为了贴近Spring Boot的需要，这里不再介绍与XML相关的IoC容器，而主要介绍一个基于注解的IoC容器，它就是AnnotationConfigApplicationContext，从名称就可以看出它是一个基于注解的IoC容器。
 
 看一个例子：
 
@@ -51,7 +51,7 @@ public class AppConfig{
 }
 ```
 
-`@Configuration`代表这是一个Java配置文件，Spring的容器会根据它来生成IoC 容器去装配Bean; `@Bean`代表将initUser方法返回的POJO装配到IoC 容器中，而其属性name 定义这个Bean的名称，如果没有配置它，则将方法名称“ initUser ”作为Bean的名称保存到Spring IoC 容器中。
+`@Configuration`代表这是一个Java配置文件，Spring的容器会根据它来生成IoC容器去装配Bean; `@Bean`代表将`initUser`方法返回的POJO装配到IoC容器中，而其属性name 定义这个Bean的名称，如果没有配置它，则将方法名称“ initUser ”作为Bean的名称保存到Spring IoC 容器中。
 
 做好了这些，就可以使用AnnotationConfigApplicationContext来构建自己的IoC 容器：
 
@@ -65,7 +65,7 @@ public class IocTest {
 }
 ```
 
-代码中将Java配置文件AppConfig传递给AnnotationConfigApplicationContext的构造方法，这样它就能够读取配置了。然后将配置里面的Bean装配到IoC容器中，于是可以使用getBean方法获取对应的POJO 。
+代码中将Java配置文件`AppConfig`传递给AnnotationConfigApplicationContext的构造方法，这样它就能够读取配置了。然后将配置里面的Bean装配到IoC容器中，于是可以使用getBean方法获取对应的POJO 。
 
 当然这只是很简单的方法，而注解`@Bean`也不是唯一创建Bean的方法，还有其他的方法可以让IoC容器装配Bean，而且Bean之间还有依赖的关系需要进一步处理。
 
@@ -186,7 +186,7 @@ public class IocTest {
 }
 ```
 
-### 3.3.1 注解@Autowired
+### 3.3.1 注解`@Autowired`
 
 `@Autowired`是我们使用得最多的注解之一， 因此在这里需要进一步地探讨它。它注入的机制最基本的一条是根据类型（ by type ）， 我们回顾IoC容器的顶级接口BeanFactory，就可以知道IoC 容器是通过getBean方法获取对应Bean的，而getBean又支持根据类型（ by type ）或者根据名称（ by name ）。
 
@@ -223,6 +223,6 @@ public class APerson implements Person {
 }
 ```
 
-这里， 我们只是将属性的名称从animal修改为了dog，那么我们再测试的时候，你可以看到是采用狗来提供服务的。那是因为@Autowired提供这样的规则， 首先它会根据类型找到对应的Bean，如果对应类型的Bean不是唯一的，那么它会根据其属性名称和Bean的名称进行匹配。如果匹配得上，就会使用该Bean，如果还无法匹配，就会抛出异常。
+这里， 我们只是将属性的名称从animal修改为了dog，那么我们再测试的时候，你可以看到是采用狗来提供服务的。那是因为`@Autowired`提供这样的规则， 首先它会根据类型找到对应的Bean，如果对应类型的Bean不是唯一的，那么它会根据其属性名称和Bean的名称进行匹配。如果匹配得上，就会使用该Bean，如果还无法匹配，就会抛出异常。
 
-这里还要注意的是@Autowired是一个默认必须找到对应Bean的注解，如果不能确定其标注属性一定会存在并且允许这个被标注的属性为null ，那么你可以配置@Autowired属性required为false。
+这里还要注意的是`@Autowired`是一个默认必须找到对应Bean的注解，如果不能确定其标注属性一定会存在并且允许这个被标注的属性为`null` ，那么你可以配置`@Autowired`属性`required`为`false`。
