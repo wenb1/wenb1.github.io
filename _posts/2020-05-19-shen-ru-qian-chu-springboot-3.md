@@ -296,5 +296,11 @@ Spring Bean的初始化流程：
 
 ![springboot bean生命周期](/images/posts/springboot/chapter3_1.PNG)
 
-`@ComponentScan`中还有一个配置项`lazyInit`，只可以配置Boolean值，且默认值为`false`，也就是
-默认不进行延迟初始化，因此在默认的情况下Spring会对Bean进行实例化和依赖注入对应的属性值。
+`@ComponentScan`中还有一个配置项`lazyInit`，只可以配置Boolean值，且默认值为`false`，也就是默认不进行延迟初始化，因此在默认的情况下Spring会对Bean进行实例化和依赖注入对应的属性值。在配置`lazyInit`之后，Spring就不会在发布Bean定义后马上为我们完成实例化和依赖注入。
+
+```java
+@Configuration
+@ComponentScan(basePackages = "dev.wenbo.learnspring.chapter3", lazyInit = true)
+public class AppConfiguration {
+}
+```
