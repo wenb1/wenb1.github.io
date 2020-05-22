@@ -295,3 +295,6 @@ Bean定义大致过程如下：
 Spring Bean的初始化流程：
 
 ![springboot bean生命周期](/images/posts/springboot/chapter3_1.PNG)
+
+`@ComponentScan`中还有一个配置项`lazyInit`，只可以配置Boolean值，且默认值为`false`，也就是
+默认不进行延迟初始化，因此在默认的情况下Spring会对Bean进行实例化和依赖注入对应的属性值。
