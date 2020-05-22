@@ -226,3 +226,72 @@ public class APerson implements Person {
 这里， 我们只是将属性的名称从animal修改为了dog，那么我们再测试的时候，你可以看到是采用狗来提供服务的。那是因为`@Autowired`提供这样的规则， 首先它会根据类型找到对应的Bean，如果对应类型的Bean不是唯一的，那么它会根据其属性名称和Bean的名称进行匹配。如果匹配得上，就会使用该Bean，如果还无法匹配，就会抛出异常。
 
 这里还要注意的是`@Autowired`是一个默认必须找到对应Bean的注解，如果不能确定其标注属性一定会存在并且允许这个被标注的属性为`null` ，那么你可以配置`@Autowired`属性`required`为`false`。
+
+### 3.3.2 消除歧义性一`@Primary`和`@Quelifier`
+
+在上面我们发现有猫有狗的时候，为了使`@Autowired`能够继续使用，我们做了一个决定，将BussinessPerson的属性名称从animal 修改为dog。显然这是一个憋屈的做法，好好的一个动物，却被我们定义为了狗。产生注入失败的问题根本是按类型（ by type ） 查找，正如动物可以有多种类型，这样会造成Spring IoC容器注入的困扰，我们把这样的一个问题称为歧义性。
+
+我们可以通过`@Primary`注解来修改优先权来解决这个问题，当我们有猫有狗的时候，假设这次需要使用猫，那么只需要在猫类的定义上加入`@Primary`就可以了：
+
+```java
+@Component
+@Primary
+public class Cat implements Animal {
+    @Override
+    public void use() {
+        System.out.println("猫很可爱");
+    }
+}
+```
+
+这里的`@Primary`的含义告诉Spring IoC容器，当发现有多个同样类型的Bean时，请优先使用我进行注入，于是再进行测试时会发现，系统将用猫为你提供服务。因为当Spring进行注入的时候虽然它发现存在多个动物，但因为Cat被标注为了`@Primary`，所以优先采用Cat 的实例进行了注入，这样就通过优先级的变换使得IoC容器知道注入哪个具体的实例来满足依赖注入。
+
+有时候`@Primary`也可以使用在多个类上，也许无论是猫还是狗都可能带上`@Primary`注解，其结果是IoC容器还是无法区分采用哪个Bean的实例进行注入， 又或者说我们需要更加灵活的机制来实现注入，那么`@Quelifier`可以满足你的这个愿望。它的配置项`value`需要一个字符串去定义，它将与`@Autowired`组合在一起，通过类型和名称一起找到Bean。
+
+```java
+@Component
+public class APerson implements Person {
+
+    @Autowired
+    @Qualifier("dog")
+    private Animal animal;
+	...
+}
+```
+
+一旦这样声明，Spring IoC将会以类型和名称去寻找对应的Bean进行注入。根据类型和名称，显然也只能找到狗为我们服务了。
+
+### 3.3.3 带有参数的构造方法类的装配
+
+在上面，我们都基于一个默认的情况，那就是不带参数的构造方法下实现依赖注入。但事实上，有些类只有带有参数的构造方法，于是上述的方法都不能再使用了。为了满足这个功能，我们可以使用`@Autowired`注解对构造方法的参数进行注入。
+
+```java
+@Component
+public class APerson implements Person {
+
+    private Animal animal;
+
+    public APerson(@Autowired @Qualifier("dog") Animal animal){
+        this.animal = animal;
+    }
+    ...
+}
+```
+
+## 3.4 生命周期
+
+Bean的生命周期过程大致分为：Bean定义，Bean的初始化，Bean的生存期和Bean的销毁4个部分。
+
+Bean定义大致过程如下：
+
+- Spring通过我们的配置，如`@ComponentScan`定义的扫描路径去找到带有`@Component`的类，这个过程就是一个资源定位的过程。
+
+- 一旦找到了资源，那么它就开始解析，并且将定义的信息保存起来。注意，此时还没有初始化Bean，也就没有Bean的实例，它有的仅仅是Bean 的定义。
+
+- 然后就会把Bean定义发布到Spring IoC容器中。此时，IoC容器也只有Bean的定义，还是没有Bean的实例生成。
+
+完成了这3 步只是一个资源定位并将Bean的定义发布到IoC容器的过程，还没有Bean实例的生成，更没有完成依赖注入。在默认的情况下， Spring会继续去完成Bean的实例化和依赖注入，这样从IoC容器中就可以得到一个依赖注入完成的Bean 。但是，有些Bean会受到变化因素的影响，这时我们倒希望是取出Bean 的时候完成初始化和依赖注入，换句话说就是让那些Bean只是将定义发布到IoC 容器而不做实例化和依赖注入，当我们取出来的时候才做初始化和依赖注入等操作。
+
+Spring Bean的初始化流程：
+
+![springboot bean生命周期](/images/posts/springboot/chapter3_1.PNG)
