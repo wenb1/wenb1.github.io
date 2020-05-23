@@ -244,7 +244,7 @@ public class Cat implements Animal {
 }
 ```
 
-这里的`@Primary`的含义告诉Spring IoC容器，当发现有多个同样类型的Bean时，请优先使用我进行注入，于是再进行测试时会发现，系统将用猫为你提供服务。因为当Spring进行注入的时候虽然它发现存在多个动物，但因为Cat被标注为了`@Primary`，所以优先采用Cat 的实例进行了注入，这样就通过优先级的变换使得IoC容器知道注入哪个具体的实例来满足依赖注入。
+这里的`@Primary`的含义告诉Spring IoC容器，当发现有多个同样类型的Bean时，请优先使用我进行注入，于是再进行测试时会发现，系统将用猫为你提供服务。因为当Spring进行注入的时候虽然它发现存在多个动物，但因为Cat被标注为了`@Primary`，所以优先采用Cat的实例进行了注入，这样就通过优先级的变换使得IoC容器知道注入哪个具体的实例来满足依赖注入。
 
 有时候`@Primary`也可以使用在多个类上，也许无论是猫还是狗都可能带上`@Primary`注解，其结果是IoC容器还是无法区分采用哪个Bean的实例进行注入， 又或者说我们需要更加灵活的机制来实现注入，那么`@Quelifier`可以满足你的这个愿望。它的配置项`value`需要一个字符串去定义，它将与`@Autowired`组合在一起，通过类型和名称一起找到Bean。
 
@@ -296,7 +296,7 @@ Spring Bean的初始化流程：
 
 ![springboot bean生命周期](/images/posts/springboot/chapter3_1.PNG)
 
-`@ComponentScan`中还有一个配置项`lazyInit`，只可以配置Boolean值，且默认值为`false`，也就是默认不进行延迟初始化，因此在默认的情况下Spring会对Bean进行实例化和依赖注入对应的属性值。在配置`lazyInit`之后，Spring就不会在发布Bean定义后马上为我们完成实例化和依赖注入。
+`@ComponentScan`中还有一个配置项`lazyInit`，只可以配置`boolean`值，且默认值为`false`，也就是默认不进行延迟初始化，因此在默认的情况下Spring会对Bean进行实例化和依赖注入对应的属性值。在配置`lazyInit`之后，Spring就不会在发布Bean定义后马上为我们完成实例化和依赖注入。
 
 ```java
 @Configuration
