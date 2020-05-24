@@ -28,11 +28,11 @@ Java的并发离不开线程，想了解线程又离不开进程和并行。在�
 
 **并行**：指在同一时刻，有多条指令在多个处理器上同时执行。所以无论从微观还是从宏观来看，二者都是一起执行的。
 
-![并行](images/posts/java/concurrency_2.png)
+![并行](/images/posts/java/concurrency_2.png)
 
 **并发**：指在同一时刻只能有一条指令执行，但多个进程指令被快速的轮换执行，使得在宏观上具有多个进程同时执行的效果，但在微观上并不是同时执行的，只是把时间分成若干段，使多个进程快速交替的执行。
 
-![并发](images/posts/java/concurrency_1.png)
+![并发](/images/posts/java/concurrency_1.png)
 
 
 
