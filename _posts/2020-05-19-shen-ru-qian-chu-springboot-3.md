@@ -459,3 +459,11 @@ public class LearnSpringApplication {
 ```
 
 ## 3.6 条件装配Bean
+
+有时候某些客观的因素会使一些Bean无法进行初始化，例如，在数据库连接池的配置中漏掉一些配置会造成数据源不能连接上。在这样的情况下，IoC容器如果还进行数据源的装配， 则系统将会抛出异常，导致应用无法继续。这时倒是希望IoC容器不去装配数据源。为了处理这样的场景，Spring提供了`@Conditional`注解帮助我们，而它需要配合另外一个接口Condition(org.springframework .context.annotation.Condition)来完成对应的功能。
+
+## 3.7 Bean的作用域
+
+在介绍IoC容器最顶级接口BeanFactory的时候，可以看到is Singleton和isPrototype两个方法。其中，isSingleton方法如果返回true，则Bean在loC容器中以单例存在，这也是Spring IoC容器的默认值；如果isPrototype方法返回true，则当我们每次获取Bean的时候，IoC容器都会创建一个新的Bean，这显然存在很大的不同，这便是Spring Bean的作用域的问题。在一般的容器中，Bean 都会存在单例(Singleton)和原型(Prototype)两种作用域，Java EE 广泛地使用在互联网中，而在Web容器中， 则存在页面(page) 、请求(request)、会话(session)和应用(application)4 种作用域。对于页面(page)，是针对JSP当前页面的作用域，所以Spring是无法支持的。
+
+![springboot bean生命周期](/images/posts/springboot/chapter3_3.PNG)
