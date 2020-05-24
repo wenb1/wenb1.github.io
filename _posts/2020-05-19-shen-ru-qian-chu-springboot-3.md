@@ -290,7 +290,7 @@ Bean定义大致过程如下：
 
 - 然后就会把Bean定义发布到Spring IoC容器中。此时，IoC容器也只有Bean的定义，还是没有Bean的实例生成。
 
-完成了这3 步只是一个资源定位并将Bean的定义发布到IoC容器的过程，还没有Bean实例的生成，更没有完成依赖注入。在默认的情况下， Spring会继续去完成Bean的实例化和依赖注入，这样从IoC容器中就可以得到一个依赖注入完成的Bean 。但是，有些Bean会受到变化因素的影响，这时我们倒希望是取出Bean 的时候完成初始化和依赖注入，换句话说就是让那些Bean只是将定义发布到IoC 容器而不做实例化和依赖注入，当我们取出来的时候才做初始化和依赖注入等操作。
+完成了这3 步只是一个资源定位并将Bean的定义发布到IoC容器的过程，还没有Bean实例的生成，更没有完成依赖注入。在默认的情况下， Spring会继续去完成Bean的实例化和依赖注入，这样从IoC容器中就可以得到一个依赖注入完成的Bean 。但是，有些Bean会受到变化因素的影响，这时我们倒希望是取出Bean的时候完成初始化和依赖注入，换句话说就是让那些Bean只是将定义发布到IoC 容器而不做实例化和依赖注入，当我们取出来的时候才做初始化和依赖注入等操作。
 
 Spring Bean的初始化流程：
 
@@ -304,3 +304,158 @@ Spring Bean的初始化流程：
 public class AppConfiguration {
 }
 ```
+
+为了完成依赖注入的功能， Spring在完成依赖注入之后，还提供了一系列的接口和配置来完成Bean初始化的过程。Spring在完成依赖注入后，还会进行如下的流程来完成它的生命周期：
+
+![springboot bean生命周期](/images/posts/springboot/chapter3_2.PNG)
+
+- 在没有注释的情况下的流程节点都是针对单个Bean而言的，但是BeanPostProcessor是针对所有Bean而言的。
+
+- 即使定义了ApplicationContextAware接口，但是有时候并不会调用，这要根据你的IoC容器来决定。我们知道，Spring IoC容器最低的要求是实现BeanFactory接口，而不是实现ApplicationContext接口。对于那些没有实现ApplicationContext接口的容器，在生命周期对应的ApplicationContextAware定义的方法也是不会被调用的，只有实现了ApplicationContext接口的容器，才会在生命周期调用ApplicationContextAware所定义setApplicationContext方法。
+
+再贴一篇更详细的Spring bean生命周期的文章：
+
+[请别再问Spring Bean的生命周期了！(sunshujie1990)](https://www.jianshu.com/p/1dec08d290c1)
+
+## 3.5 使用属性文件
+
+在Spring Boot中使用属性文件，可以采用其默认为我们准备的application.properties，也可以使用自定义的配置文件。
+
+先在Maven配置文件中添加依赖：
+
+```xml
+<dependency>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-configuration-processor</artifactId>
+	<optional>true</optional>
+</dependency>
+```
+
+有了依赖，就可以使用application.properties文件了，例如配置数据库：
+
+```properties
+database.driverName=com.mysql.jdbc.Driver
+database.url=jdbc:mysql://localhost:3306/chapter3
+database.username=root
+database.password=l23456
+```
+
+它会通过其机制读取到上下文中，这样就可以引用它了。对于它的引用有两种方法，第一种是**Spring表达式**：
+
+```java
+@Component
+public class DataBaseProperties {
+    @Value("${database.driverName}")
+    private String driverName;
+
+    @Value("${database.url}")
+    private String url;
+
+    private String username;
+
+    private String password;
+
+    public String getDriverName() {
+        return driverName;
+    }
+
+    public void setDriverName(String driverName) {
+        this.driverName = driverName;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    @Value("${database.username}")
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    @Value("${database.password}")
+    public void setPassword(String password) {
+        this.password = password;
+    }
+}
+```
+
+这样我们就可以通过`@Value`注解，使用${ ...... }这样的占位符读取配置在属性文件的内容。这里
+的`@Value`注解，既可以加载属性，也可以加在方法上。
+
+第二种方法是使用**注解`@ConfigurationProperties`**，通过这种方法使得配置上有所减少，我们重写下之前的配置代码：
+
+```java
+@Component
+@ConfigurationProperties("database")
+public class DataBaseProperties {
+    private String driverName;
+
+    private String url;
+
+    private String username;
+
+    private String password;
+
+    public String getDriverName() {
+        return driverName;
+    }
+
+    public void setDriverName(String driverName) {
+        this.driverName = driverName;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+}
+```
+
+在注解`@ConfigurationProperties`中配置的字符串database，将与POJO 的属性名称组成属性的全限定名去配置文件里查找，这样就能将对应的属性读入到POJO当中。
+
+但是有时候我们会觉得如果把所有的内容都配置到application.properties，显然这个文件将有很多内容。为了更好地配置，我们可以选择使用新的属性文件。例如，数据库的属性可以配置在jdbc.properties，然后使用`@PropertySource`去定义对应的属性文件，把它加载到Spring上下文中。
+
+```java
+@SpringBootApplication
+@PropertySource(value = {"classpath:jdbc.properties"}, ignoreResourceNotFound = true)
+public class LearnSpringApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(LearnSpringApplication.class, args);
+    }
+
+}
+```
+
+## 3.6 条件装配Bean
