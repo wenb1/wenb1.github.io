@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Java之注解(Annotations)
+title: Java之注解(Annotation)
 categories: Java
 description: 讲解Java中的注解
 keywords: Java, annotations, 注解
