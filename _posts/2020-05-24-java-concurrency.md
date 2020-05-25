@@ -47,17 +47,104 @@ Java的并发离不开线程，想了解线程又离不开进程和并行。在�
 
 ## 2.1 继承`Thread`类
 
+我们创建一个类继承`Thread`类，并重写`run()`方法就能定义一个任务，再调用`start()`方法就能开启线程，例如：
 
+```java
+public class MyThread extends Thread {
+    protected int countDown=10;
+    private static int taskCount=0;
+    private final int id=taskCount++; //不同实例的id
+
+    public MyThread(){
+    }
+
+    public MyThread(int countDown){
+        this.countDown=countDown;
+    }
+
+    public String status(){
+        return "#"+id+"("+(countDown>0?countDown:"Liftoff!")+"),";
+    }
+    @Override
+    public void run(){
+        // run方法中一般都会有一个循环，有时是无限循环，等待被一些条件打断停止，否则会无限循环
+        while (countDown-->0){
+            System.out.println(status());
+            Thread.yield(); //告诉线程调度器，这个线程已经完成任务了，CPU可以切换执行其它任务
+        }
+    }
+}
+```
+
+```java
+public class MyThreadTest {
+    public static void main(String[] args) {
+        MyThread thread=new MyThread();
+        thread.start();
+    }
+}
+```
 
 ## 2.2 实现`Runnable`接口
 
+我们只需要实现`Runnable`接口并且重写`run()`方法就能定义一个任务，例如：
 
+```java
+public class LiftOff implements Runnable {
+    protected int countDown=10;
+    private static int taskCount=0;
+    private final int id=taskCount++; //创建不同实例赋予的id
 
+    public LiftOff(){
+    }
 
+    public LiftOff(int countDown){
+        this.countDown=countDown;
+    }
 
+    public String status(){
+        return "#"+id+"("+(countDown>0?countDown:"Liftoff!")+"),";
+    }
 
+    @Override
+    public void run() {
+        // run方法中一般都会有一个循环，有时是无限循环，等待被一些条件打断停止，否则会无限循环
+        while (countDown-->0){
+            System.out.println(status());
+            Thread.yield(); //告诉线程调度器，这个线程已经完成任务了，CPU可以切换执行其它任务
+        }
+    }
+}
+```
 
+创建好了任务之后，我们就需要一个线程去执行它。具体方法是，调用`Thread`类的构造器。把实现了`Runnable`接口的实例作为参数放到`Thread`构造方法中，创建新线程，再调用`start()`方法开启线程，例如：
 
+```java
+public class BasicThreads {
+    public static void main(String[] args) {
+        Thread t=new Thread(new LiftOff());
+        t.start();
+        System.out.println("Waiting for LiftOff");
+    }
+}
+/**运行结果：
+ * Waiting for LiftOff
+ * #0(9),
+ * #0(8),
+ * #0(7),
+ * #0(6),
+ * #0(5),
+ * #0(4),
+ * #0(3),
+ * #0(2),
+ * #0(1),
+ * #0(Liftoff!),
+ */
+```
+
+从打印出的结果我们可以看到，即使`t.start()`方法在打印方法之前调用，实际执行的顺序其实是先打印再调用`t.start()`。原因是主线程又开启了一个线程去执行`LifeOff`类中复写的`run()`方法，而主线程完成打印的时间快去另一个线程循环的时间，所以打印顺序没有按照代码的先后顺序执行。
+
+实际上，线程执行程序的顺序和代码顺序没有必然联系。
 
 **参考文章**：
 
