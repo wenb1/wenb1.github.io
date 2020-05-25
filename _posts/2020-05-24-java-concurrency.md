@@ -175,9 +175,66 @@ public class Thread implements Runnable{
 
 `Thread`类和`Runnable`接口之间在使用上也是有区别的，如果一个类继承 `Thread`类，则不适合于多个线程共享资源，而实现了`Runnable`接口，就可以方便地实现资源的共享。而实现接口也可以避免单继承的局限性。
 
-## 2.4 线程的返回值 
+## 2.4 使用`Executors`
 
+Java SE5的`java.util.concurrent`包提供了`Executors`简化线程的启动，我们就不需要创建一个`Thread`对象去开启线程，而是通过`Executors`来帮助我们执行任务。例如：
 
+```java
+public class CachedThreadPool {
+    public static void main(String[] args) {
+        ExecutorService exec= Executors.newCachedThreadPool();
+        for(int i=0;i<5;i++){
+            exec.execute(new LiftOff());
+        }
+        //阻止新任务执行
+        exec.shutdown();
+    }
+}
+```
+
+`ExecutorService`知道如何去执行任务。一般情况下，一个`Executor`就足够管理所有的任务了。
+
+## 2.5 线程的返回值 
+
+不管是继承`Thread`类还是实现`Runnable`接口的方法，都没有返回值。而如果需要线程完成任务时返回值，我们需要实现`Callable`接口，而不是`Runnable`。
+
+`Callable`接口是在Java SE5中引入的，通过`call()`方法和泛型来返回特定类型的值，而不是之前介绍的`run()`方法，而且必须配合`ExecutorService`的`submit()`方法来调用。例如：
+
+```java
+public class TaskWithResult implements Callable<String> {
+    private int id;
+
+    public TaskWithResult(int id){
+        this.id=id;
+    }
+    
+    @Override
+    public String call() throws Exception {
+        return "result of TashWithResult "+id;
+    }
+}
+```
+
+```java
+public class CallableDemo {
+    public static void main(String[] args) {
+        ExecutorService exec= Executors.newCachedThreadPool();
+        ArrayList<Future<String>> results=new ArrayList<Future<String>>();
+        for(int i=0;i<10;i++)
+            results.add(exec.submit(new TaskWithResult(i)));
+        for(Future<String> fs:results){
+            try {
+                System.out.println(fs.get());
+            }catch (InterruptedException | ExecutionException e){
+                System.out.println(e);
+                return;
+            }finally {
+                exec.shutdown();
+            }
+        }
+    }
+}
+```
 
 **参考文章**：
 
