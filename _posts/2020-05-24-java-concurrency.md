@@ -255,6 +255,10 @@ Java中的线程有六种状态，分别是**创建(New)**，**运行(Runnable)*
 - 超时等待(Timed Waiting)：处于这种状态的线程不会被分配CPU执行时间，不过无须无限期等待被其他线程显示地唤醒，在达到一定时间后它们会自动唤醒。
 - 终止(Terminated)：当任务执行完或者因为错误，线程就会进入终止态。线程一旦进入终止态就不能复生。在一个终止的线程上调用`start()`方法，会抛出`java.lang.IllegalThreadStateException`异常。
 
+各个状态的关系如下：
+
+![装态转换](/images/posts/java/concurrency_3.png)
+
 **参考文章**：
 
 [并发和并行的区别 (杰哥长得帅)](https://www.jianshu.com/p/cbf9588b2afb)
