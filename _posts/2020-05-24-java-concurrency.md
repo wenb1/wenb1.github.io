@@ -182,6 +182,7 @@ Java SE5的`java.util.concurrent`包提供了`Executors`简化线程的启动，
 ```java
 public class CachedThreadPool {
     public static void main(String[] args) {
+        //CachedThreadPool需要多少线程就会创建多少线程，当旧线程执行完任务会重新使用旧线程
         ExecutorService exec= Executors.newCachedThreadPool();
         for(int i=0;i<5;i++){
             exec.execute(new LiftOff());
@@ -192,7 +193,7 @@ public class CachedThreadPool {
 }
 ```
 
-`ExecutorService`知道如何去执行任务。一般情况下，一个`Executor`就足够管理所有的任务了。
+`ExecutorService`知道如何去执行任务。一般情况下，一个`Executor`就足够管理所有的任务了。我们还可以把`newCachedThreadPool()`替换为`newFixedThreadPool(5)`，它能规定使用多少个线程，我们只需要一次性把所有线程创建出来，不用担心有更多的线程创建从而导致浪费时间。
 
 ## 2.5 线程的返回值 
 
@@ -219,7 +220,7 @@ public class TaskWithResult implements Callable<String> {
 public class CallableDemo {
     public static void main(String[] args) {
         ExecutorService exec= Executors.newCachedThreadPool();
-        ArrayList<Future<String>> results=new ArrayList<Future<String>>();
+        ArrayList<Future<String>> results=new ArrayList<>();
         for(int i=0;i<10;i++)
             results.add(exec.submit(new TaskWithResult(i)));
         for(Future<String> fs:results){
@@ -235,6 +236,24 @@ public class CallableDemo {
     }
 }
 ```
+
+`submit()`方法执行完之后返回一个`Future`对象，在我们这个例子中是`Future<String>`对象。我们还可以调用`Future`对象的`isDone()`方法查看线程是否完成。如果任务完成，可以调用`get()`方法获得执行结果，如果任务没有完成而调用了`get()`方法，`get()`方法会阻塞直到有返回结果。
+
+# 3. Java线程的状态
+
+Java中的线程有六种状态，分别是**创建(New)**，**运行(Runnable)**，**阻塞(Blocked)**，**等待(Waiting)**，**超时等待(Timed Waiting)**和**终止(Terminated)**。
+
+- 创建(New)：新创建出一个线程，还没有调用`start()`方法，只作为一个对象存在
+
+- 运行(Runnable)：Java线程中将就绪(Ready)和运行中(Running)两种状态笼统的称为“运行”。调用`start()`后线程就会进入就绪状态。该状态的线程位于可运行线程池中，等待被线程调度器选中，获取CPU的使用权，此时处于就绪状态(Ready)。就绪状态的线程在获得CPU时间片后变为运行中状态(Running)。
+
+  ![运行态](/images/posts/java/concurrency_3.png)
+
+- 阻塞(Blocked)：当一个处于就绪态的线程不能立刻执行它的任务，而它需要暂时等待其它任务执行完毕。
+
+- 等待(Waiting)：当前线程在执行的任务需要其它任务优先执行。处于这种状态的线程不会被分配CPU执行时间，它们要等待被显式地唤醒，否则会处于无限期等待的状态。
+- 超时等待(Timed Waiting)：处于这种状态的线程不会被分配CPU执行时间，不过无须无限期等待被其他线程显示地唤醒，在达到一定时间后它们会自动唤醒。
+- 终止(Terminated)：当任务执行完或者因为错误，线程就会进入终止态。线程一旦进入终止态就不能复生。在一个终止的线程上调用`start()`方法，会抛出`java.lang.IllegalThreadStateException`异常。
 
 **参考文章**：
 
