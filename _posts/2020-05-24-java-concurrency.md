@@ -252,12 +252,122 @@ Java中的线程有六种状态，分别是**创建(New)**，**运行(Runnable)*
 - 阻塞(Blocked)：当一个处于就绪态的线程不能立刻执行它的任务，而它需要暂时等待其它任务执行完毕。
 
 - 等待(Waiting)：当前线程在执行的任务需要其它任务优先执行。处于这种状态的线程不会被分配CPU执行时间，它们要等待被显式地唤醒，否则会处于无限期等待的状态。
+
 - 超时等待(Timed Waiting)：处于这种状态的线程不会被分配CPU执行时间，不过无须无限期等待被其他线程显示地唤醒，在达到一定时间后它们会自动唤醒。
+
 - 终止(Terminated)：当任务执行完或者因为错误，线程就会进入终止态。线程一旦进入终止态就不能复生。在一个终止的线程上调用`start()`方法，会抛出`java.lang.IllegalThreadStateException`异常。
+
+  线程终止的原因有：
+
+  - 线程正常终止：`run()`方法执行到`return`语句返回；
+  - 线程意外终止：`run()`方法因为未捕获的异常导致线程终止；
+  - 对某个线程的`Thread`实例调用`stop()`方法强制终止（强烈不推荐使用）。
 
 各个状态的关系如下：
 
-![装态转换](/images/posts/java/concurrency_3.png)
+![状态转换](/images/posts/java/concurrency_4.png)
+
+# 4. 线程的方法
+
+## 4.1 线程的优先级
+
+线程的优先级代表了不同线程对调度器的重要程度不同。尽管CPU运行线程的顺序是不定的，但是它更倾向于挑选高优先级的等待线程上CPU。这不意味着低优先级的线程就不会运行，而是不如高优先级的线程运行的频繁。
+
+Java中的线程优先级的范围是1～10，默认的优先级是5。10极最高。我们可以通过`getPriority()`来获得线程的优先级，通过`setPriority()`更改线程优先级。示例：
+
+```java
+public class SimplePriorities implements Runnable{
+    private int countDown=5;
+    private volatile double d;
+    private int priority;
+    private int id;
+
+    public SimplePriorities(int priority, int id){
+        this.priority=priority;
+        this.id=id;
+    }
+
+    public void run(){
+        Thread.currentThread().setPriority(priority);
+        while (true){
+            for(int i=1;i<100000;i++){
+                d += (Math.PI + Math.E)/ (double) i;
+                if(i%1000==0)
+                    Thread.yield();
+            }
+            System.out.println("线程的id是： "+id+" 优先级是： "+priority);
+            if(--countDown==0) return;
+        }
+    }
+
+    public static void main(String[] args) {
+        ExecutorService exec= Executors.newCachedThreadPool();
+        for(int i=0;i<5;i++){
+            exec.execute(new SimplePriorities(Thread.MIN_PRIORITY, i));
+        }
+        exec.execute(new SimplePriorities(Thread.MAX_PRIORITY, 5));
+        exec.shutdown();
+    }
+}
+```
+
+从运行后的结果可以看出，无论是是级别相同还是不同，线程调用都不会绝对按照优先级执行。
+
+## 4.2 `Sleep()`
+
+`sleep()`方法也就是睡眠方法可以让线程进入*超时等待*状态，在规定的时间之后，线程重新回到运行态等待调用。`sleep()`有两种形式：
+
+```java
+public static native void sleep(long millis) throws InterruptedException;
+```
+
+```java
+public static void sleep(long millis, int nanos)
+```
+
+`millis`参数决定了线程睡眠的时间，以毫秒为单位，`nanos`代表额外的睡眠时间，以纳秒为单位。
+
+使用如下：
+
+```java
+public class SleepingTask extends LiftOff{
+    public void run(){
+        while(countDown-->0){
+            System.out.println(status());
+            try {
+                Thread.sleep(100);
+                //TimeUnit.MILLISECONDS.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        ExecutorService exec= Executors.newCachedThreadPool();
+        for(int i=0;i<5;i++){
+            exec.execute(new SleepingTask());
+        }
+        exec.shutdown();
+    }
+}
+```
+
+## 4.3 `yield()`
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 **参考文章**：
 
@@ -266,3 +376,7 @@ Java中的线程有六种状态，分别是**创建(New)**，**运行(Runnable)*
 [进程与线程 (浅浅念)](https://www.cnblogs.com/qianqiannian/p/7010909.html)
 
 [Java多线程看这一篇就足够了（吐血超详细总结）(Java团长)](https://www.cnblogs.com/java1024/p/11950129.html)
+
+[Java线程的6种状态及切换(透彻讲解) (诚o)](https://blog.csdn.net/qq_22771739/article/details/82529874)
+
+[廖雪峰的官方网站](https://www.liaoxuefeng.com/wiki/1252599548343744/1306580767211554)
