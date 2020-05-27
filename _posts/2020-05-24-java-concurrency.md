@@ -265,7 +265,7 @@ Java中的线程有六种状态，分别是**创建(New)**，**运行(Runnable)*
 
 各个状态的关系如下：
 
-![状态转换](/images/posts/java/concurrency_4.png)
+![状态转换](/images/posts/java/concurrency_5.png)
 
 # 4. 线程的方法
 
@@ -378,7 +378,11 @@ public class SleepingTask extends LiftOff{
 }
 ```
 
-和之前`sleep()`方法的结果相比，我们看到有让步失败的情况。
+和之前`sleep()`方法的结果相比，我们看到有让步失败的情况。源码的注释中提到`yield()`并不是一个常用的方法，一般用来debug或者测试。
+
+## 4.4 `join()`
+
+ 
 
 
 
