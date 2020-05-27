@@ -355,7 +355,7 @@ public class SleepingTask extends LiftOff{
 
 ## 4.3 `yield()`
 
-`yield()`的作用是：暂停当前正在执行的线程对象，并执行其他线程。具体是让运行中的线程回到就绪态，以允许具有相同优先级的其他线程获得运行机会。因此，使用`yield()`的目的是让相同优先级的线程之间能适当的轮转执行。但是，实际中无法保证`yield()`达到让步目的，因为让步的线程还有可能被线程调度程序再次选中。
+`yield()`的作用是：暂停当前正在执行的线程对象，并执行其他线程。具体是让**运行中**的线程回到**就绪态**，以允许具有相同优先级的其他线程获得运行机会。因此，使用`yield()`的目的是让相同优先级的线程之间能适当的轮转执行。但是，实际中无法保证`yield()`达到让步目的，因为让步的线程还有可能被线程调度程序再次选中。
 
 我们修改下之前的例子，把`Thread.sleep(100)`修改成`Thread.yield()`：
 
@@ -382,13 +382,74 @@ public class SleepingTask extends LiftOff{
 
 ## 4.4 `join()`
 
- 
+ 在一个线程中，我们可以调用另一个线程的`join()`方法，作用是当前线程放弃执行，进入**等待**状态或者**超时等待**状态，直到调用`join()`方法的线程执行完才返回执行当前线程。
 
+例如：
 
+```java
+public class PrintTask implements Runnable{
+    private String name;
 
+    public PrintTask(String name){
+        this.name=name;
+    }
 
+    @Override
+    public void run() {
+        for(int i=0;i<1000;i++){
+            System.out.println(name + "在运行");
+        }
+    }
+}
+```
 
+```java
+public class JoinTest {
+    public static void main(String[] args) throws InterruptedException {
+        Runnable newPrintTask=new PrintTask("Thread1");
+        Runnable newPrintTask1=new PrintTask("Thread2");
 
+        Thread t1=new Thread(newPrintTask);
+        Thread t2=new Thread(newPrintTask1);
+
+        t1.start();
+        /**
+         * 程序在main线程中调用t1线程的join方法，则main线程放弃cpu控制权，并返回t1线程继续执行直到线程t1执行完毕
+         * 所以结果是t1线程执行完后，才到主线程执行，相当于在main线程中同步t1线程，t1执行完了，main线程才有执行的机会
+         */
+        t1.join();
+        t2.start();
+
+    }
+}
+```
+
+运行结果是Thread1全部执行完之后，Thread2才开始执行。
+
+在A线程中调用了B线程的`join()`方法时，表示只有当B线程执行完毕时，A线程才能继续执行。注意，这里调用的`join()`方法是没有传参的，`join()`方法其实也可以传递一个参数给它的，规定等待的时间。
+
+例如：
+
+```
+public class JoinTest {
+    public static void main(String[] args) throws InterruptedException {
+        Runnable newPrintTask=new PrintTask("Thread1");
+        Runnable newPrintTask1=new PrintTask("Thread2");
+
+        Thread t1=new Thread(newPrintTask);
+        Thread t2=new Thread(newPrintTask1);
+
+        t1.start();
+        t1.join(10);
+        t2.start();
+
+    }
+}
+```
+
+结果是前10ms执行的是Thread1，之后是Thread1和Thread2交替执行。
+
+所以，`join()`方法中如果传入参数，则表示这样的意思：如果A线程中掉用B线程的`join(10)`，则表示A线程会等待B线程执行10毫秒，10毫秒过后，A、B线程并行执行。需要注意的是，JDK规定，`join(0)`的意思不是A线程等待B线程0秒，而是A线程等待B线程无限时间，直到B线程执行完毕，即`join(0)`等价于`join()`。
 
 **参考文章**：
 
