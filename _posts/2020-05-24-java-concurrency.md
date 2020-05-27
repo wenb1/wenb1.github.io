@@ -315,7 +315,7 @@ public class SimplePriorities implements Runnable{
 
 ## 4.2 `Sleep()`
 
-`sleep()`方法也就是睡眠方法可以让线程进入*超时等待*状态，在规定的时间之后，线程重新回到运行态等待调用。`sleep()`有两种形式：
+`sleep()`方法也就是睡眠可以让线程进入**超时等待**状态，在规定的时间之后，线程重新回到**运行态**等待调用。`sleep()`有两种形式：
 
 ```java
 public static native void sleep(long millis) throws InterruptedException;
@@ -355,13 +355,30 @@ public class SleepingTask extends LiftOff{
 
 ## 4.3 `yield()`
 
+`yield()`的作用是：暂停当前正在执行的线程对象，并执行其他线程。具体是让运行中的线程回到就绪态，以允许具有相同优先级的其他线程获得运行机会。因此，使用`yield()`的目的是让相同优先级的线程之间能适当的轮转执行。但是，实际中无法保证`yield()`达到让步目的，因为让步的线程还有可能被线程调度程序再次选中。
 
+我们修改下之前的例子，把`Thread.sleep(100)`修改成`Thread.yield()`：
 
+```java
+public class SleepingTask extends LiftOff{
+    public void run(){
+        while(countDown-->0){
+            System.out.println(status());
+            Thread.yield();
+        }
+    }
 
+    public static void main(String[] args) {
+        ExecutorService exec= Executors.newCachedThreadPool();
+        for(int i=0;i<5;i++){
+            exec.execute(new SleepingTask());
+        }
+        exec.shutdown();
+    }
+}
+```
 
-
-
-
+和之前`sleep()`方法的结果相比，我们看到有让步失败的情况。
 
 
 
