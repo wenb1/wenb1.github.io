@@ -592,7 +592,7 @@ static synchronized void f(){}
 static synchronized void g(){}
 ```
 
-值得注意的是，类锁和对象锁是不冲突的。换句话说。如果一个线程调用了`synchronized`方法说明它获得了对象锁，其它线程不能调用同一对象的所有`synchronized`，而可以调用`static synchronized`标记的方法，也就是说，可以获得类锁。即便没有获得对象锁，也不影响获得类锁。
+值得注意的是，类锁和对象锁是不冲突的。换句话说，如果一个线程调用了`synchronized`方法说明它获得了对象锁，其它线程不能调用同一对象的所有`synchronized`方法，而可以调用`static synchronized`标记的方法，也就是说，可以获得类锁。即便没有获得对象锁，也不影响获得类锁。
 
 **参考文章**：
 
