@@ -267,7 +267,7 @@ Java中的线程有六种状态，分别是**创建(New)**，**运行(Runnable)*
 
 ![状态转换](/images/posts/java/concurrency_5.png)
 
-# 4. 线程的方法
+# 4. 线程的基本方法
 
 ## 4.1 线程的优先级
 
@@ -318,7 +318,7 @@ public class SimplePriorities implements Runnable{
 `sleep()`方法也就是睡眠可以让线程进入**超时等待**状态，在规定的时间之后，线程重新回到**运行态**等待调用。`sleep()`有两种形式：
 
 ```java
-public static native void sleep(long millis) throws InterruptedException;
+public static native void sleep(long millis) throws InterruptedException
 ```
 
 ```java
@@ -384,7 +384,21 @@ public class SleepingTask extends LiftOff{
 
  在一个线程中，我们可以调用另一个线程的`join()`方法，作用是当前线程放弃执行，进入**等待**状态或者**超时等待**状态，直到调用`join()`方法的线程执行完才返回执行当前线程。
 
-例如：
+`join()`方法有三种形式：
+
+```java
+public final synchronized void join(long millis) throws InterruptedException
+```
+
+```java
+public final synchronized void join(long millis, int nanos) throws InterruptedException
+```
+
+```java
+public final void join() throws InterruptedException
+```
+
+使用如下：
 
 ```java
 public class PrintTask implements Runnable{
@@ -430,7 +444,7 @@ public class JoinTest {
 
 例如：
 
-```
+```java
 public class JoinTest {
     public static void main(String[] args) throws InterruptedException {
         Runnable newPrintTask=new PrintTask("Thread1");
@@ -451,7 +465,129 @@ public class JoinTest {
 
 所以，`join()`方法中如果传入参数，则表示这样的意思：如果A线程中掉用B线程的`join(10)`，则表示A线程会等待B线程执行10毫秒，10毫秒过后，A、B线程并行执行。需要注意的是，JDK规定，`join(0)`的意思不是A线程等待B线程0秒，而是A线程等待B线程无限时间，直到B线程执行完毕，即`join(0)`等价于`join()`。
 
+我们只有在一个线程需要等待另一个线程的任务执行完的时候才需要使用`join()`方法。比如，线程A需要等待线程B打开文件之后才能执行。
+
+# 5. 资源共享
+
+在多线程程序里，我们需要考虑多个线程共享资源引发的问题。在生活中，就像两辆车抢一个车位，两个人同时进一个门一样。
+
+## 5.1 共享资源访问问题
+
+我们先看一个例子，我们创建两个对象，一个对象负责制造偶数，而另一个对象负责使用这些偶数。
+
+```java
+public abstract class IntGenerator {
+    private volatile boolean canceled=false;
+    public abstract int next();
+
+    //改变标识位
+    public void cancel(){
+        canceled=true;
+    }
+    //查看是否被取消
+    public boolean isCanceled(){
+        return canceled;
+    }
+}
+```
+
+```java
+public class EvenChecker implements Runnable{
+    private IntGenerator generator;
+    private final int id;
+
+    public EvenChecker(IntGenerator g, int ident){
+        generator=g;
+        id=ident;
+    }
+
+    @Override
+    public void run() {
+        while (!generator.isCanceled()){
+            int val=generator.next();
+            if(val%2!=0){
+                System.out.println(val+" not even! ");
+                generator.cancel();
+            }
+        }
+    }
+
+    public static void test(IntGenerator gp, int count){
+        System.out.println("Press control-c to exit");
+        ExecutorService exec= Executors.newCachedThreadPool();
+        for(int i=0;i<count;i++){
+            exec.execute(new EvenChecker(gp, i));
+        }
+        exec.shutdown();
+    }
+
+    public static void test(IntGenerator gp){
+        test(gp, 10);
+    }
+}
+```
+
+从`EvenChecker`类中我们看到，`EvenChecker`的运行取决于`IntGenerator`，在`run()`方法中要检查`IntGenerator`的标识位。通过这种方法，线程的共享资源`IntGenerator`可以监控标识位信号来决定是否终止，消除了竞争条件(race condition)，也就是多个线程竞争同一个资源时产生的时间问题或者序列冲突。一般情况下，一个任务不能取决于另一个任务，因为任务的终止顺序是不确定的。我们这个例子通过一个任务取决于一个非任务对象来消除潜在的竞争条件。
+
+测试一下：
+
+```java
+public class EvenGenerator extends IntGenerator{
+    private int currentEvenValue=0;
+
+    @Override
+    public int next() {
+        ++currentEvenValue; //危险操作
+        ++currentEvenValue;
+        return currentEvenValue;
+    }
+
+    public static void main(String[] args) {
+        EvenChecker.test(new EvenGenerator());
+    }
+}
+/**结果：
+ * Press control-c to exit
+ * 385 not even! 
+ * 387 not even! 
+ * 383 not even! 
+ */
+```
+
+从`EvenGenerator`类的`next()`方法可以看出，我们通过累加两次`currentEvenValue`值来制造偶数，如果每个线程都能把`next()`方法执行完而不被打断，而之后的线程在一个线程执行完`next()`方法之后再使用`currentEvenValue`的话，会一直产生偶数。可从结果看到，线程并不是这样执行的。
+
+实际上，在一个线程执行完第一个`++currentEvenValue`而没有执行第二个`++currentEvenValue`操作时，有一个线程调用了`next()`方法，这时`currentEvenValue`的值就会产生错误。
+
+## 5.2 解决共享资源竞争
+
+我们可以通过加锁来解决这个问题。一个线程在使用共享资源的时候需要锁住资源，其它线程就需要等待这个线程解锁之后才能使用共享资源。我们通过一些机制来实现一次只能有一个线程使用共享资源，实现互斥(mutual exclusion)。
+
+举个例子，公共厕所就像互斥资源，一个人在使用厕所的时候会锁上门，而其它人会先敲敲门来看看里面有没有人，如果有人的话，就在外面排队，等到里面的人出来再进去锁住门，阻止其它人进入。
+
+Java有一种内置的方法来加锁，那就是`synchronized`关键字，也就是**隐式锁**。还有另一种锁，`lock`类，也叫**显式锁**。
+
+### 5.2.1 `synchronized`
+
+当我们使用了`synchronized`关键字，线程会先查看锁是否可用，如果可用则获得锁，执行代码，之后再释放锁。
+
+共享资源一般以对象的形式存在，也可能是一个文件，I/O端口等等。我们把共享资源放入一个对象，使用共享资源的方法加上`synchronized`关键字。如果一个线程在使用`synchronized`标记的方法，想使用这个方法的其它线程就会被阻塞直到锁释放。
+
+我们可以在方法上使用`synchronized`：
+
+```java
+synchronized void f(){}
+synchronized void g(){}
+```
+
+事实上，所有的对象都自动有一个**对象锁**，或者叫**管程(monitor)**，当一个线程调用了一个对象里的`synchronized`方法，这个对象会被对象锁锁住，其它线程不能调用这个对象里其它被`synchronized`标记的方法。比如，`f()`方法和`g()`方法存在于一个对象里，当一个线程调用了`f()`方法，则其它线程既不能使用`f()`方法，也不能使用`g()`方法直到锁释放。实际是，一个对象的所有`synchronized`方法共享一把锁。
+
+一个线程可以多次获得对象锁。这种情况一般发生在一个线程在获得对象锁之后多次调用对象里的方法。JVM会跟踪对象被锁的次数，如果对象解锁，则次数清零。
+
+不同于每个对象一把的对象锁，还有一种锁，是每个类只有一把，就是**类锁**。
+
 **参考文章**：
+
+[《Java编程思想》(Thinking in Java)]()
 
 [并发和并行的区别 (杰哥长得帅)](https://www.jianshu.com/p/cbf9588b2afb)
 
@@ -462,3 +598,5 @@ public class JoinTest {
 [Java线程的6种状态及切换(透彻讲解) (诚o)](https://blog.csdn.net/qq_22771739/article/details/82529874)
 
 [廖雪峰的官方网站](https://www.liaoxuefeng.com/wiki/1252599548343744/1306580767211554)
+
+[java 线程方法join的简单总结 (coder-lcp)](https://www.cnblogs.com/lcplcpjava/p/6896904.html)
