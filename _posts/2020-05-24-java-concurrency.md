@@ -570,13 +570,13 @@ Java有一种内置的方法来加锁，那就是`synchronized`关键字，也�
 
 当我们使用了`synchronized`关键字，线程会先查看锁是否可用，如果可用则获得锁，执行代码，之后再释放锁。
 
-共享资源一般以对象的形式存在，也可能是一个文件，I/O端口等等。我们把共享资源放入一个对象，使用共享资源的方法加上`synchronized`关键字。如果一个线程在使用`synchronized`标记的方法，想使用这个方法的其它线程就会被阻塞直到锁释放。
+共享资源一般以对象的形式存在，也可能是一个文件，I/O端口等等。我们把共享资源放入一个对象，使用共享资源的方法加上`synchronized`关键字。如果一个线程在使用`synchronized`标记的方法，想使用这个方法的其它线程就会被阻塞直到锁释放。`synchronized`可以在方法上使用，也可以在代码块上使用。
 
-我们可以在方法上使用`synchronized`：
+在方法上使用`synchronized`：
 
 ```java
-synchronized void f(){}
-synchronized void g(){}
+public synchronized void f(){}
+public synchronized void g(){}
 ```
 
 事实上，所有的对象都自动有一个**对象锁(object level lock)**，它与**管程(monitor)**相关，当一个线程调用了一个对象里的`synchronized`方法，这个对象会被对象锁锁住，其它线程不能调用这个对象里其它被`synchronized`标记的方法。比如，`f()`方法和`g()`方法存在于一个对象里，当一个线程调用了`f()`方法，则其它线程既不能使用`f()`方法，也不能使用`g()`方法直到锁释放。实际是，一个对象的所有`synchronized`方法共享一把锁。所以，多个线程调用不同对象的同一`synchronized`方法时，不会被阻塞。
@@ -585,14 +585,61 @@ synchronized void g(){}
 
 不同于每个对象一把的对象锁，还有一种锁，是每个类只有一把，就是**类锁(class level lock)**。类锁是`Class`对象的一部分。对象锁是用于对象实例方法，或者一个对象实例上的，类锁是用于类的静态方法或者一个类的`Class`对象上的。我们知道，类的对象实例可以有很多个，但是每个类只有一个`Class`对象，所以不同对象实例的对象锁是互不干扰的，但是每个类只有一个类锁。但是有一点必须注意的是，其实类锁只是一个概念上的东西，并不是真实存在的，它只是用来帮助我们理解锁定实例方法和静态方法的区别的。
 
-使用如下：
+静态方法使用如下：
 
 ```java
-static synchronized void f(){}
-static synchronized void g(){}
+public static synchronized void f(){}
+public static synchronized void g(){}
 ```
 
 值得注意的是，类锁和对象锁是不冲突的。换句话说，如果一个线程调用了`synchronized`方法说明它获得了对象锁，其它线程不能调用同一对象的所有`synchronized`方法，而可以调用`static synchronized`标记的方法，也就是说，可以获得类锁。即便没有获得对象锁，也不影响获得类锁。
+
+------
+
+`synchronized`在代码块上使用：
+
+```java
+//同步代码块，锁住该类的实例对象
+public void f(){
+    synchronized(this){
+	}
+}
+```
+
+使用代码块锁住类实例对象与使用`synchronized`作用于普通方法实际是一样的，只是形式不同。
+
+```java
+//同步代码块，锁住类对象
+public void f(){
+    synchronized(Demo.class){
+	}
+}
+```
+
+而使用代码块锁住类对象与使用`synchronized`作用静态方法是一样的。
+
+------
+
+我们使用`synchronized`修改下5.1的代码：
+
+```java
+public class EvenGenerator extends IntGenerator{
+    private int currentEvenValue=0;
+
+    @Override
+    public synchronized int next() {
+        ++currentEvenValue; //危险操作
+        ++currentEvenValue;
+        return currentEvenValue;
+    }
+
+    public static void main(String[] args) {
+        EvenChecker.test(new EvenGenerator());
+    }
+}
+```
+
+### 5.2.2 使用Lock对象
 
 **参考文章**：
 
