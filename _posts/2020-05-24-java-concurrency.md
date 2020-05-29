@@ -582,7 +582,7 @@ public synchronized void g(){}
 
 事实上，所有的对象都自动有一个**对象锁(object level lock)**，它与**管程(monitor)**相关，当一个线程调用了一个对象里的`synchronized`方法，这个对象会被对象锁锁住，其它线程不能调用这个对象里其它被`synchronized`标记的方法。比如，`f()`方法和`g()`方法存在于一个对象里，当一个线程调用了`f()`方法，则其它线程既不能使用`f()`方法，也不能使用`g()`方法直到锁释放。实际是，一个对象的所有`synchronized`方法共享一把锁。所以，多个线程调用不同对象的同一`synchronized`方法时，不会被阻塞。
 
-一个线程可以多次获得对象锁。这种情况一般发生在一个线程在获得对象锁之后多次调用对象里的方法。JVM会跟踪对象被锁的次数，如果对象解锁，则次数清零。
+一个线程可以多次获得对象锁。这种情况一般发生在一个线程在获得对象锁之后多次调用对象里的其它方法。JVM会跟踪对象被锁的次数，如果对象解锁，则次数清零。这种运行方式就是可重入锁。
 
 不同于每个对象一把的对象锁，还有一种锁，是每个类只有一把，就是**类锁(class level lock)**。类锁是`Class`对象的一部分。对象锁是用于对象实例方法，或者一个对象实例上的，类锁是用于类的静态方法或者一个类的`Class`对象上的。我们知道，类的对象实例可以有很多个，但是每个类只有一个`Class`对象，所以不同对象实例的对象锁是互不干扰的，但是每个类只有一个类锁。但是有一点必须注意的是，其实类锁只是一个概念上的东西，并不是真实存在的，它只是用来帮助我们理解锁定实例方法和静态方法的区别的。
 
@@ -640,11 +640,11 @@ public class EvenGenerator extends IntGenerator{
 }
 ```
 
-### 5.2.2 Lock类     
+### 5.2.2 `Lock`类     
 
-在Java SE5中，`java.util.concurrent`包提供了一种显式的互斥机制Lock。Lock对象必须被显式地定义出来，上锁，解锁。所以我们也称它为**显锁**。   
+在Java SE5中，`java.util.concurrent`包提供了一种显式的互斥机制`Lock`。`Lock`对象必须被显式地定义出来，上锁，解锁。所以我们也称它为**显锁**。   
 
-使用Lock改写5.1的代码：
+使用`Lock`改写5.1的代码：
 
 ```java
 public class MutexEvenGenerator extends IntGenerator{
@@ -715,7 +715,7 @@ public interface Lock {
 
 ### 5.2.3 可重入锁(ReentrantLock)
 
-可重入锁简单理解就是对同一个线程而言，它可以重复的获取锁。例如这个线程可以连续获取两次锁，但是释放锁的次数也一定要是两次。`synchronized`也是一种可重入锁。我们改写5.1的代码使用的就是可重入锁。
+可重入锁简单理解就是对同一个线程而言，它可以重复的获取锁。例如这个线程可以连续获取两次锁，但是释放锁的次数也一定要是两次。我们之前提到`synchronized`也是一种可重入锁。我们改写5.1的代码使用的就是可重入锁。
 
 **线程中断响应**
 
@@ -729,7 +729,7 @@ public interface Lock {
 
 当一个线程释放锁时，其他等待的线程则有机会获取锁，如果是公平锁，则分先来后到的获取锁，如果是非公平锁则谁抢到锁算谁的，这就相当于排队买东西和不排队买东西是一个道理。`synchronized`是非公平锁。
 
-重入锁`ReentrantLock`是可以设置公平性的：
+可重入锁`ReentrantLock`是可以设置公平性的：
 
 ```java
 // 通过传入一个布尔值来设置公平锁，为true则是公平锁，false则为非公平锁
@@ -739,6 +739,38 @@ public ReentrantLock(boolean fair) {
 ```
 
 构建一个公平锁需要维护一个有序队列，如果实际需求用不到公平锁则不需要使用公平锁。
+
+### 5.2.4 读写锁(ReadWriteLock)
+
+`synchronized`存在明显的一个性能问题就是读与读之间互斥，简言之就是，我们编程想要实现的最好效果是，可以做到读和读互不影响，读和写互斥，写和写互斥，提高读写的效率。
+
+`java.util.concurrent`包中`ReadWriteLock`是一个接口，主要有两个方法：
+
+```java
+public interface ReadWriteLock {
+    /**
+     * Returns the lock used for reading.
+     *
+     * @return the lock used for reading
+     */
+    Lock readLock();
+
+    /**
+     * Returns the lock used for writing.
+     *
+     * @return the lock used for writing
+     */
+    Lock writeLock();
+}
+```
+
+`ReadWriteLock`管理一组锁，一个是只读的锁，一个是写锁。Java并发库中`ReetrantReadWriteLock`实现了`ReadWriteLock`接口并添加了可重入的特性。
+
+**锁降级**
+
+要实现一个读写锁，需要考虑很多细节，其中之一就是锁升级和锁降级的问题。什么是升级和降级呢？
+
+在不允许中间写入的情况下，写入锁可以降级为读锁吗？读锁是否可以升级为写锁，优先于其他等待的读取或写入操作？简言之就是说，锁降级：从写锁变成读锁；锁升级：从读锁变成写锁。`ReentrantReadWriteLock`支持锁降级但不支持锁升级。
 
 **参考文章**：
 
@@ -759,3 +791,5 @@ public ReentrantLock(boolean fair) {
 [JAVA显式锁简介 (Cafebaby)](https://www.jianshu.com/p/75212b04dbfe)
 
 [Java的锁—彻底理解重入锁(ReentrantLock) (kopshome)](https://blog.csdn.net/I_AM_KOP/article/details/80958856)
+
+[【Java并发】ReadWriteLock读写锁的使用 (itbird01)](https://www.jianshu.com/p/9cd5212c8841)
