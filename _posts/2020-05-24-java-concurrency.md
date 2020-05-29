@@ -4,6 +4,7 @@ title: Java之并发(Concurrency)
 categories: Java
 description: 讲解Java中的并发
 keywords: Java, concurrency, 并发
+
 ---
 
 有一些编程问题，我们用顺序执行的程序就能解决。然而，还有一些问题，我们使用并发编程更方便，甚至于必须使用并发编程才能解决。并发程序能极大提升程序的性能，还能为一些问题提供一个模型，更便于解决。
@@ -564,7 +565,7 @@ public class EvenGenerator extends IntGenerator{
 
 举个例子，公共厕所就像互斥资源，一个人在使用厕所的时候会锁上门，而其它人会先敲敲门来看看里面有没有人，如果有人的话，就在外面排队，等到里面的人出来再进去锁住门，阻止其它人进入。
 
-Java有一种内置的方法来加锁，那就是`synchronized`关键字，也就是**隐式锁**。还有另一种锁，`lock`类，也叫**显式锁**。
+Java有一种内置的方法来加锁，那就是`synchronized`关键字，也就是**隐式锁**。还有另一种锁，`Lock`类，也叫**显式锁**。
 
 ### 5.2.1 `synchronized`
 
@@ -639,7 +640,105 @@ public class EvenGenerator extends IntGenerator{
 }
 ```
 
-### 5.2.2 使用Lock对象
+### 5.2.2 Lock类     
+
+在Java SE5中，`java.util.concurrent`包提供了一种显式的互斥机制Lock。Lock对象必须被显式地定义出来，上锁，解锁。所以我们也称它为**显锁**。   
+
+使用Lock改写5.1的代码：
+
+```java
+public class MutexEvenGenerator extends IntGenerator{
+    private int currentEvenValue=0;
+    private Lock lock=new ReentrantLock();
+
+    @Override
+    public int next() {
+        lock.lock();
+        try{
+            ++currentEvenValue; //危险操作
+            ++currentEvenValue;
+            return currentEvenValue;
+        }finally {
+            lock.unlock();
+        }
+    }
+
+    public static void main(String[] args) {
+        EvenChecker.test(new MutexEvenGenerator());
+    }
+}
+```
+
+`Lock`实际是一个接口，定义了这些方法：
+
+```java
+public interface Lock {
+    
+    /*请求锁，实现时应该考虑能够检测出错误的使用，如避免死锁或者抛出未经检查的异常     */
+    void lock();
+    
+	/*支持在请求锁的时候被中断     */
+    void lockInterruptibly() throws InterruptedException;
+	
+    /*如果请求锁时锁可用则立即获取并返回true,否则立即返回false     */
+    boolean tryLock();
+  
+    /*如果请求锁时锁可用则立即获取并返回true ，否则线程进入不可调度状态直到以下三种情况：
+    *线程获取锁
+    *其他线程中断当前线程
+    *超时
+    */
+    boolean tryLock(long time, TimeUnit unit) throws InterruptedException;
+	
+    /*释放锁     */
+    void unlock();
+    
+	/*返回一个新的绑定到当前lock实例的Condition对象实例     */
+    Condition newCondition();
+}
+
+```
+
+相比于隐锁`synchronized`，显锁更加灵活。代码中try-finally的形式允许我们做更多的事，不同于`synchronized`遇到异常会直接抛出异常，显锁可以通过try-finally的灵活性让我们处理异常，维护系统在合适的状态。
+
+隐锁和显锁的区别：
+
+|          |                隐锁(synchronized)                |                          显锁(Lock)                          |
+| :------: | :----------------------------------------------: | :----------------------------------------------------------: |
+| 实现方式 | Java中的关键字，是由JVM来维护的。是JVM层面的锁。 | JDK5以后才出现的具体的类。使用lock是调用对应的API，是API层面的锁。 |
+| 使用方式 |     系统维护，自动上锁和释放，不易出现死锁。     |               手动上锁和释放锁，容易出现死锁。               |
+| 等待中断 |    不可中断的。除非抛出异常或者正常运行完成。    |                          可以中断。                          |
+|  公平性  |                     非公平锁                     |                两者都可以的。默认是非公平锁。                |
+| 实现机制 |                  悲观锁，独占锁                  | 乐观锁，就是每次不加锁，假设没有冲突地去执行，如果冲突了就重试，直到成功 |
+
+接下来，我们介绍`Lock`的具体实现类。
+
+### 5.2.3 可重入锁(ReentrantLock)
+
+可重入锁简单理解就是对同一个线程而言，它可以重复的获取锁。例如这个线程可以连续获取两次锁，但是释放锁的次数也一定要是两次。`synchronized`也是一种可重入锁。我们改写5.1的代码使用的就是可重入锁。
+
+**线程中断响应**
+
+如果线程阻塞于`synchronized`，那么要么获取到锁，继续执行，要么一直等待。重入锁提供了另一种可能，就是中断线程。如果某一线程A正在执行锁中的代码，另一线程B正在等待获取该锁，可能由于等待时间过长，线程B不想等待了，想先处理其他事情，我们可以让它中断自己或者在别的线程中中断它，这种就是可中断锁。
+
+**有限时间的等待锁**
+
+顾名思义，简单理解就是在指定的时间内如果拿不到锁，则不再等待锁。当持有锁的线程出问题导致长时间持有锁的时候，不可能让其他线程永远等待其释放锁。
+
+**公平锁与非公平锁**
+
+当一个线程释放锁时，其他等待的线程则有机会获取锁，如果是公平锁，则分先来后到的获取锁，如果是非公平锁则谁抢到锁算谁的，这就相当于排队买东西和不排队买东西是一个道理。`synchronized`是非公平锁。
+
+重入锁`ReentrantLock`是可以设置公平性的：
+
+```java
+// 通过传入一个布尔值来设置公平锁，为true则是公平锁，false则为非公平锁
+public ReentrantLock(boolean fair) {
+	sync = fair ? new FairSync() : new NonfairSync();
+}
+```
+
+构建一个公平锁需要维护一个有序队列，如果实际需求用不到公平锁则不需要使用公平锁。
 
 **参考文章**：
 
@@ -656,3 +755,7 @@ public class EvenGenerator extends IntGenerator{
 [廖雪峰的官方网站](https://www.liaoxuefeng.com/wiki/1252599548343744/1306580767211554)
 
 [java 线程方法join的简单总结 (coder-lcp)](https://www.cnblogs.com/lcplcpjava/p/6896904.html)
+
+[JAVA显式锁简介 (Cafebaby)](https://www.jianshu.com/p/75212b04dbfe)
+
+[Java的锁—彻底理解重入锁(ReentrantLock) (kopshome)](https://blog.csdn.net/I_AM_KOP/article/details/80958856)
