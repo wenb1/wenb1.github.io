@@ -766,11 +766,184 @@ public interface ReadWriteLock {
 
 `ReadWriteLock`管理一组锁，一个是只读的锁，一个是写锁。Java并发库中`ReetrantReadWriteLock`实现了`ReadWriteLock`接口并添加了可重入的特性。
 
+**公平锁与非公平锁**
+
+支持公平与非公平（默认）的锁获取方式，吞吐量非公平优先于公平。
+
 **锁降级**
 
 要实现一个读写锁，需要考虑很多细节，其中之一就是锁升级和锁降级的问题。什么是升级和降级呢？
 
 在不允许中间写入的情况下，写入锁可以降级为读锁吗？读锁是否可以升级为写锁，优先于其他等待的读取或写入操作？简言之就是说，锁降级：从写锁变成读锁；锁升级：从读锁变成写锁。`ReentrantReadWriteLock`支持锁降级但不支持锁升级。
+
+**读锁和读锁的使用**
+
+```java
+public class ReadWriteLockTest {
+
+    public static void get(Thread thread) {
+        ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+        lock.readLock().lock();
+        System.out.println(thread.getName() + ":start time:" + System.currentTimeMillis());
+        for (int i = 0; i < 5; i++) {
+            try {
+                Thread.sleep(20);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println(thread.getName() + ":正在进行读操作……");
+        }
+        System.out.println(thread.getName() + ":读操作完毕！");
+        System.out.println(thread.getName() + ":end time:" + System.currentTimeMillis());
+        lock.readLock().unlock();
+    }
+
+    public static void main(String[] args) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                get(Thread.currentThread());
+            }
+        }).start();
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                get(Thread.currentThread());
+            }
+        }).start();
+    }
+}
+
+```
+
+Thread-0和Thread-1交替执行，由此可见`ReentrantReadWriteLock`读锁使用共享模式，即：同时可以有多个线程并发地读数据。
+
+**读锁和写锁穿插使用**
+
+```java
+public class ReadWriteLockTest {
+    public static ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+
+    public static void main(String[] args) {
+        //同时读、写
+        ExecutorService service = Executors.newCachedThreadPool();
+        service.execute(new Runnable() {
+            @Override
+            public void run() {
+                readFile(Thread.currentThread());
+            }
+        });
+        service.execute(new Runnable() {
+            @Override
+            public void run() {
+                writeFile(Thread.currentThread());
+            }
+        });
+    }
+
+    // 读操作
+    public static void readFile(Thread thread) {
+        lock.readLock().lock();
+        boolean readLock = lock.isWriteLocked();
+        if (!readLock) {
+            System.out.println("当前为读锁！");
+        }
+        try {
+            for (int i = 0; i < 5; i++) {
+                try {
+                    Thread.sleep(20);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println(thread.getName() + ":正在进行读操作……");
+            }
+            System.out.println(thread.getName() + ":读操作完毕！");
+        } finally {
+            System.out.println("释放读锁！");
+            lock.readLock().unlock();
+        }
+    }
+
+    // 写操作
+    public static void writeFile(Thread thread) {
+        lock.writeLock().lock();
+        boolean writeLock = lock.isWriteLocked();
+        if (writeLock) {
+            System.out.println("当前为写锁！");
+        }
+        try {
+            for (int i = 0; i < 5; i++) {
+                try {
+                    Thread.sleep(20);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println(thread.getName() + ":正在进行写操作……");
+            }
+            System.out.println(thread.getName() + ":写操作完毕！");
+        } finally {
+            System.out.println("释放写锁！");
+            lock.writeLock().unlock();
+        }
+    }
+}
+```
+
+从运行结果看到，一个线程执行完成后，另一个线程才执行，所以读锁和写锁是互斥的。
+
+**写锁和写锁的使用**
+
+```java
+public class ReadWriteLockTest {
+    public static ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+
+    public static void main(String[] args) {
+        //同时写
+        ExecutorService service = Executors.newCachedThreadPool();
+        service.execute(new Runnable() {
+            @Override
+            public void run() {
+                writeFile(Thread.currentThread());
+            }
+        });
+        service.execute(new Runnable() {
+            @Override
+            public void run() {
+                writeFile(Thread.currentThread());
+            }
+        });
+    }
+
+    // 写操作
+    public static void writeFile(Thread thread) {
+        lock.writeLock().lock();
+        boolean writeLock = lock.isWriteLocked();
+        if (writeLock) {
+            System.out.println("当前为写锁！");
+        }
+        try {
+            for (int i = 0; i < 5; i++) {
+                try {
+                    Thread.sleep(20);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println(thread.getName() + ":正在进行写操作……");
+            }
+            System.out.println(thread.getName() + ":写操作完毕！");
+        } finally {
+            System.out.println("释放写锁！");
+            lock.writeLock().unlock();
+        }
+    }
+}
+
+```
+
+从结果我们能看出，写锁之间也是互斥的。即一个线程在做写操作的时候，另一线程不能同时做写操作。
+
+------
 
 **参考文章**：
 
