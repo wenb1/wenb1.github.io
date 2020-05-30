@@ -204,6 +204,8 @@ public interface Annotation {
 - 运行时的处理： 某些注解可以在程序运行的时候接受代码的提取
   值得注意的是，注解不是代码本身的一部分。
 
+------
+
 **参考文章**
 
 [Java 注解完全解析 (若丨寒)](https://www.jianshu.com/p/9471d6bcf4cf)

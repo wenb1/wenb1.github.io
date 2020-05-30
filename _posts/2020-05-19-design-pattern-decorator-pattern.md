@@ -145,7 +145,9 @@ public class DecoratorDemo {
  2.需要动态地给一个对象增加功能，这些功能也可以动态地被撤销。
  3.当不能采用继承的方式对系统进行扩充或者采用继承不利于系统扩展和维护时。
 
-**参考文章**
+------
+
+**参考文章**：
 
 [Design Patterns - Decorator Pattern](https://www.tutorialspoint.com/design_pattern/decorator_pattern.htm)
 

@@ -187,6 +187,8 @@ public class BuilderDemo {
 
 - 需要生成的产品对象有复杂的内部结构，这些产品对象具备共性
 
+------
+
 **参考文章**：
 
 [秒懂设计模式之建造者模式（Builder pattern）(shusheng007)](https://zhuanlan.zhihu.com/p/58093669)
