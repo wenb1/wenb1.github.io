@@ -42,7 +42,7 @@ Java的并发离不开线程，想了解线程又离不开进程和并行。在�
 
 ## 1.1 并发编程的三个概念
 
-1. **原子性**：即一个操作或者多个操作，要么全部执行并且执行的过程不会被任何因素打断，要么就都不执行。
+1. **原子性(Atomicity)**：即一个操作或者多个操作，要么全部执行并且执行的过程不会被任何因素打断，要么就都不执行。
 
    举个例子，假如为一个32位的变量赋值过程不具备原子性的话，会发生什么后果？
 
@@ -50,9 +50,9 @@ Java的并发离不开线程，想了解线程又离不开进程和并行。在�
    i = 9;
    ```
 
-   假若一个线程执行到这个语句时，我暂且假设为一个32位的变量赋值包括两个过程：为低16位赋值，为高16位赋值。那么就可能发生一种情况：当将低16位数值写入之后，突然被中断，而此时又有一个线程去读取i的值，那么读取到的就是错误的数据。
+   假若一个线程执行到这个语句时，我暂且假设为一个32位的变量赋值包括两个过程：为低16位赋值，为高16位赋值。那么就可能发生一种情况：当将低16位数值写入之后，突然被中断，而此时又有一个线程去读取`i`的值，那么读取到的就是错误的数据。
 
-2. **可见性**：当多个线程访问同一个变量时，一个线程修改了这个变量的值，其他线程能够立即看得到修改的值。
+2. **可见性(Visibility)**：当多个线程访问同一个变量时，一个线程修改了这个变量的值，其他线程能够立即看得到修改的值。
 
    举个例子：
 
@@ -68,7 +68,7 @@ Java的并发离不开线程，想了解线程又离不开进程和并行。在�
 
    这就是可见性问题，线程1对变量`i`修改了之后，线程2没有立即看到线程1修改的值。
 
-3. **有序性**：即程序执行的顺序按照代码的先后顺序执行。
+3. **有序性(Ordering)**：即程序执行的顺序按照代码的先后顺序执行。
 
    举个简单的例子，看下面这段代码：
 
@@ -103,7 +103,7 @@ Java的并发离不开线程，想了解线程又离不开进程和并行。在�
    doSomethingwithconfig(context);
    ```
 
-   上面代码中，由于语句1和语句2没有数据依赖性，因此可能会被重排序。假如发生了重排序，在线程1执行过程中先执行语句2，而此时线程2会以为初始化工作已经完成，那么就会跳出while循环，去执行`doSomethingwithconfig(context)`方法，而此时context并没有被初始化，就会导致程序出错。
+   上面代码中，由于语句1和语句2没有数据依赖性，因此可能会被重排序。假如发生了重排序，在线程1执行过程中先执行语句2，而此时线程2会以为初始化工作已经完成，那么就会跳出`while`循环，去执行`doSomethingwithconfig(context)`方法，而此时`context`并没有被初始化，就会导致程序出错。
 
    也就是说，要想并发程序正确地执行，必须要保证**原子性**、**可见性**以及**有序性**。只要有一个没有被保证，就有可能会导致程序运行不正确。
 
@@ -1019,6 +1019,10 @@ public class ReadWriteLockTest {
 1. 保证了不同线程对这个变量进行操作时的可见性，即一个线程修改了某个变量的值，这新值对其他线程来说是立即可见的。
 2. 禁止进行指令重排序。
 
+如果多个线程共用一个变量，那么，这个变量就需要使用`volatile`修饰，或者使用`synchronized`来保护这个变量。如果一个变量被`synchronized`的方法或者代码块保护起来，就不一定需要`volatile`了。
+
+`synchronized`比起`volatile`，还是我们的首选。
+
 ### 5.3.1 `volatile`与可见性
 
 `volatile`对可见性的支持，举个例子：
@@ -1097,9 +1101,66 @@ doSomethingwithconfig(context);
 
 这里如果用`volatile`关键字对`inited`变量进行修饰，就不会出现这种问题了，因为当执行到语句2时，必定能保证`context`已经初始化完毕。
 
-## 5.4 原子类
+## 5.4 原子操作(Atomic operations)
 
 ------
+
+### 5.4.1 原子操作
+
+原子操作是指一个或者多个不可再分割的操作。这些操作的执行顺序不能被打乱，这些步骤也不可以被切割而只执行其中的一部分（不可中断性）。举个列子：
+
+```java
+//赋值是一个原子操作
+int i = 1;
+
+//非原子操作，i++是一个多步操作，而且是可以被中断的。
+//i++可以被分割成3步，第一步读取i的值，第二步计算i+1；第三部将最终值赋值给i
+i++；
+```
+
+在Java中，我们可以通过锁或者CAS操作来实现原子操作。锁我们之前已经介绍了，因为锁机制保证了线程完整运行完上锁的部分，所以保证了原子性，是一种原子操作。
+
+### 5.4.2 CAS操作
+
+CAS是compare and swap的简称，这个操作是硬件级别的操作，在硬件层面保证了操作的原子性。CAS有3个操作数，内存值V，旧的预期值A，要修改的新值B。当且仅当预期值A和内存值V相同时，将内存值V修改为B，否则什么都不做。Java中的`sun.misc.Unsafe`类提供了`compareAndSwapInt`和`compareAndSwapLong`等几个方法实现CAS。
+
+如果我们自己通过CAS编写`incrementAndGet()`，它大概长这样：
+
+```java
+public int incrementAndGet(AtomicInteger var) {
+    int prev, next;
+    do {
+        prev = var.get();
+        next = prev + 1;
+    } while ( ! var.compareAndSet(prev, next));
+    return next;
+}
+```
+
+CAS是指，在这个操作中，如果`AtomicInteger`的当前值是`prev`，那么就更新为`next`，返回`true`。如果`AtomicInteger`的当前值不是`prev`，就什么也不干，返回`false`。通过CAS操作并配合`do ... while`循环，即使其他线程修改了`AtomicInteger`的值，最终的结果也是正确的。
+
+### 5.4.3 原子类(Atomic classes)
+
+在JDK的`java.util.concurrent.atomic`包下提供了很多基于CAS实现的原子操作类，`Atomic`类是通过无锁(lock-free)的方式实现的线程安全(thread-safe)访问：
+
+![原子类](/images/posts/java/concurrency_6.png)
+
+我们可以使用原子类来改写5.1的代码：
+
+```java
+public class AtomicEvenGenerator extends IntGenerator {
+    private AtomicInteger currentEvenValue=new AtomicInteger(0);
+    public int next(){
+        return currentEvenValue.addAndGet(2);
+    }
+
+    public static void main(String[] args) {
+        EvenChecker.test(new AtomicEvenGenerator());
+    }
+}
+```
+
+
 
 **参考文章**：
 
