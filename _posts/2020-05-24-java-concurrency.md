@@ -664,32 +664,6 @@ public static synchronized void g(){}
 
 值得注意的是，类锁和对象锁是不冲突的。换句话说，如果一个线程调用了`synchronized`方法说明它获得了对象锁，其它线程不能调用同一对象的所有`synchronized`方法，而可以调用`static synchronized`标记的方法，也就是说，可以获得类锁。即便没有获得对象锁，也不影响获得类锁。
 
-------
-
-`synchronized`在代码块上使用：
-
-```java
-//同步代码块，锁住该类的实例对象
-public void f(){
-    synchronized(this){
-	}
-}
-```
-
-使用代码块锁住类实例对象与使用`synchronized`作用于普通方法实际是一样的，只是形式不同。
-
-```java
-//同步代码块，锁住类对象
-public void f(){
-    synchronized(Demo.class){
-	}
-}
-```
-
-而使用代码块锁住类对象与使用`synchronized`作用静态方法是一样的。
-
-------
-
 我们使用`synchronized`修改下5.1的代码：
 
 ```java
@@ -709,7 +683,40 @@ public class EvenGenerator extends IntGenerator{
 }
 ```
 
-### 5.2.2 `Lock`类     
+### 5.2.2 临界区(Critical sections)
+
+有时，你只想阻止多线程同时进入方法的一部分，而不是整个方法。这部分你想隔离出来的代码叫做临界区(Critical sections)。我们可以使用`synchronized`创建出临界区。`synchronized`在这里用来标明是哪个对象的锁创建出的临界区，例如：
+
+```java
+synchronized(syncObject){
+	// This code can be accessed
+    // by only one task at a time
+}
+```
+
+这也被叫做**同步块(synchronized block)**，在线程进入到同步代码块之前，需要获得`syncObject`对象的锁。如果有其它线程获得了锁，则这个线程需要等到锁释放才能进入同步块。
+
+`synchronized`除了可以限制其它对象，还可以限制当前对象，用法是：
+
+```java
+//同步代码块，锁住该类的实例对象
+synchronized(this){
+}
+```
+
+使用同步块锁住类实例对象与使用`synchronized`作用于类的普通方法实际是一样的，只是形式不同。
+
+`synchronized`也可以用来锁住类对象：
+
+```java
+//同步块，锁住类对象
+synchronized(Demo.class){
+}
+```
+
+使用同步块锁住类对象与使用`synchronized`作用`static`方法是一样的。
+
+### 5.2.3 `Lock`类     
 
 在Java SE5中，`java.util.concurrent`包提供了一种显式的互斥机制`Lock`。`Lock`对象必须被显式地定义出来，上锁，解锁。所以我们也称它为**显锁**。   
 
@@ -782,7 +789,7 @@ public interface Lock {
 
 接下来，我们介绍`Lock`的具体实现类。
 
-### 5.2.3 可重入锁(ReentrantLock)
+### 5.2.4 可重入锁(ReentrantLock)
 
 可重入锁简单理解就是对同一个线程而言，它可以重复的获取锁。例如这个线程可以连续获取两次锁，但是释放锁的次数也一定要是两次。我们之前提到`synchronized`也是一种可重入锁。我们改写5.1的代码使用的就是可重入锁。
 
@@ -809,7 +816,7 @@ public ReentrantLock(boolean fair) {
 
 构建一个公平锁需要维护一个有序队列，如果实际需求用不到公平锁则不需要使用公平锁。
 
-### 5.2.4 读写锁(ReadWriteLock)
+### 5.2.5 读写锁(ReadWriteLock)
 
 `synchronized`存在明显的一个性能问题就是读与读之间互斥，简言之就是，我们编程想要实现的最好效果是，可以做到读和读互不影响，读和写互斥，写和写互斥，提高读写的效率。
 
@@ -1014,6 +1021,8 @@ public class ReadWriteLockTest {
 
 ## 5.3 `volatile`
 
+`volatile`是Java提供的一种轻量级的同步机制。Java语言包含两种内在的同步机制：同步块(或方法)和 `volatile` 变量，相比于`synchronized`(`synchronized`通常称为重量级锁)，`volatile`更轻量级，因为它不会引起线程上下文的切换和调度。但是`volatile`变量的同步性较差(有时它更简单并且开销更低)，而且其使用也更容易出错。
+
 一旦一个共享变量(类的成员变量、类的静态成员变量)被`volatile`修饰之后，那么就具备了两层语义：
 
 1. 保证了不同线程对这个变量进行操作时的可见性，即一个线程修改了某个变量的值，这新值对其他线程来说是立即可见的。
@@ -1021,7 +1030,7 @@ public class ReadWriteLockTest {
 
 如果多个线程共用一个变量，那么，这个变量就需要使用`volatile`修饰，或者使用`synchronized`来保护这个变量。如果一个变量被`synchronized`的方法或者代码块保护起来，就不一定需要`volatile`了。
 
-`synchronized`比起`volatile`，还是我们的首选。
+`synchronized`还是我们的首选。
 
 ### 5.3.1 `volatile`与可见性
 
@@ -1105,7 +1114,7 @@ doSomethingwithconfig(context);
 
 ### 5.4.1 原子操作
 
-原子操作是指一个或者多个不可再分割的操作。这些操作的执行顺序不能被打乱，这些步骤也不可以被切割而只执行其中的一部分（不可中断性）。举个列子：
+原子操作是指一个或者多个不可再分割的操作。这些操作的执行顺序不能被打乱，这些步骤也不可以被切割而只执行其中的一部分(不可中断性)。举个列子：
 
 ```java
 //赋值是一个原子操作
@@ -1113,7 +1122,7 @@ int i = 1;
 
 //非原子操作，i++是一个多步操作，而且是可以被中断的。
 //i++可以被分割成3步，第一步读取i的值，第二步计算i+1；第三部将最终值赋值给i
-i++；
+i++;
 ```
 
 在Java中，我们可以通过锁或者CAS操作来实现原子操作。锁我们之前已经介绍了，因为锁机制保证了线程完整运行完上锁的部分，所以保证了原子性，是一种原子操作。
@@ -1182,6 +1191,6 @@ public class AtomicEvenGenerator extends IntGenerator {
 
 [【Java并发】ReadWriteLock读写锁的使用 (itbird01)](https://www.jianshu.com/p/9cd5212c8841)
 
-[Java并发编程：volatile关键字解析 (Matrix 海 子)](https://www.cnblogs.com/dolphin0520/p/3920373.html)
+[Java并发编程：volatile关键字解析 (Matrix 海子)](https://www.cnblogs.com/dolphin0520/p/3920373.html)
 
 [【并发编程】Java中的原子操作 (程序员自由之路)](https://www.cnblogs.com/54chensongxia/p/11910681.html)
