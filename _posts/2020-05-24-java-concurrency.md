@@ -1103,8 +1103,6 @@ doSomethingwithconfig(context);
 
 ## 5.4 原子操作(Atomic operations)
 
-------
-
 ### 5.4.1 原子操作
 
 原子操作是指一个或者多个不可再分割的操作。这些操作的执行顺序不能被打乱，这些步骤也不可以被切割而只执行其中的一部分（不可中断性）。举个列子：
@@ -1185,3 +1183,5 @@ public class AtomicEvenGenerator extends IntGenerator {
 [【Java并发】ReadWriteLock读写锁的使用 (itbird01)](https://www.jianshu.com/p/9cd5212c8841)
 
 [Java并发编程：volatile关键字解析 (Matrix 海 子)](https://www.cnblogs.com/dolphin0520/p/3920373.html)
+
+[【并发编程】Java中的原子操作 (程序员自由之路)](https://www.cnblogs.com/54chensongxia/p/11910681.html)
