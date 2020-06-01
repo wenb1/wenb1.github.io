@@ -640,8 +640,6 @@ Java有一种内置的方法来加锁，那就是`synchronized`关键字，也�
 
 共享资源一般以对象的形式存在，也可能是一个文件，I/O端口等等。我们把共享资源放入一个对象，使用共享资源的方法加上`synchronized`关键字。如果一个线程在使用`synchronized`标记的方法，想使用这个方法的其它线程就会被阻塞直到锁释放。`synchronized`可以在方法上使用，也可以在代码块上使用。
 
-------
-
 在方法上使用`synchronized`：
 
 ```java
@@ -1129,7 +1127,7 @@ i++;
 
 ### 5.4.2 CAS操作
 
-CAS是compare and swap的简称，这个操作是硬件级别的操作，在硬件层面保证了操作的原子性。CAS有3个操作数，内存值V，旧的预期值A，要修改的新值B。当且仅当预期值A和内存值V相同时，将内存值V修改为B，否则什么都不做。Java中的`sun.misc.Unsafe`类提供了`compareAndSwapInt`和`compareAndSwapLong`等几个方法实现CAS。
+CAS是Compare And Swap的简称，这个操作是硬件级别的操作，在硬件层面保证了操作的原子性。CAS有3个操作数，内存值V，旧的预期值A，要修改的新值B。当且仅当预期值A和内存值V相同时，将内存值V修改为B，否则什么都不做。Java中的`sun.misc.Unsafe`类提供了`compareAndSwapInt`和`compareAndSwapLong`等几个方法实现CAS。
 
 如果我们自己通过CAS编写`incrementAndGet()`，它大概长这样：
 
@@ -1167,7 +1165,39 @@ public class AtomicEvenGenerator extends IntGenerator {
 }
 ```
 
+## 5.5 `ThreadLocal`
 
+另一种防止线程共享资源冲突的是消除变量的共享。`ThreadLocal`机制可以为一个共享变量创造出多份存储备份，供每个线程使用。比如，有5个线程共享一个变量x，则`ThreadLocal`可以创建出5个变量x的备份，实际在每个线程操作的时候，操作的是自己本地内存中的变量。
+
+# 6. 结束线程
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+------
 
 **参考文章**：
 
