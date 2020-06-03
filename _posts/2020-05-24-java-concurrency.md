@@ -1169,8 +1169,6 @@ public class AtomicEvenGenerator extends IntGenerator {
 
 另一种防止线程共享资源冲突的是消除变量的共享。`ThreadLocal`机制可以为一个共享变量创造出多份存储备份，供每个线程使用。比如，有5个线程共享一个变量x，则`ThreadLocal`可以创建出5个变量x的备份，实际在每个线程操作的时候，操作的是自己本地内存中的变量。
 
-# 6. 结束线程
-
 
 
 
