@@ -19,3 +19,5 @@ keywords: Java, Concurrency, 并发, 终止线程, Terminate
 | `public static boolean interrupted()` | 测试当前线程是否已经中断。线程的中断状态由该方法清除。 换句话说，如果连续两次调用该方法，则第二次调用将返回false。 (在第一次调用已清除了其中断状态之后，且第二次调用检验完中断状态前，当前线程再次中断的情况除外) |      |
 |   `public boolean isInterrupted()`    |    测试线程是否已经中断。线程的中断状态不受该方法的影响。    |      |
 |       `public void interrupt()`       |  中断线程，本质上是改变了调用者代表的线程中的中断标志信号。  |      |
+
+`interrupt`方法是唯一能将中断状态设置为`true`的方法。静态方法`interrupted`会将当前线程的中断状态清除，但这个方法的命名极不直观，很容易造成误解，需要特别注意。
