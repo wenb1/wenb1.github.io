@@ -28,7 +28,7 @@ keywords: Algorithm，算法，冒泡排序
 
 这里有一张动态图说明冒泡排序的过程：
 
-![冒泡排序过程3](/images/posts/algorithms/bubble_sort_3)
+![冒泡排序过程3](/images/posts/algorithms/bubble_sort_3.gif)
 
 我们还能注意到，第一冒泡排序一定会把最大的元素排好，放到末尾。第二次排好第二大的元素，以此类推。
 
