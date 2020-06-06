@@ -132,7 +132,49 @@ public class TestInterruptionDemo {
 
 ### 1.5.3 BLOCKED
 
+```java
+public class Task implements Runnable{
 
+    public synchronized void doSomething(){
+        while(true){
+
+        }
+    }
+
+    @Override
+    public void run(){
+        doSomething();
+    }
+}
+```
+
+```java
+public class TestInterruptionDemo {
+    public static void main(String[] args) throws InterruptedException {
+        Runnable task=new Task();
+
+        Thread testThread1=new Thread(task);
+        testThread1.start();
+
+        Thread testThread2=new Thread(task);
+        testThread2.start();
+
+        Thread.sleep(1000);
+        System.out.println("testThread1: "+testThread1.getState());
+        System.out.println("testThread2: "+testThread2.getState());
+        testThread2.interrupt();
+        System.out.println(testThread2.isInterrupted());
+        System.out.println("testThread2: "+testThread2.getState());
+    }
+}
+
+/** result：
+ testThread1: RUNNABLE
+ testThread2: BLOCKED
+ true
+ testThread2: BLOCKED
+ */
+```
 
 # 2. 使用标识位
 
