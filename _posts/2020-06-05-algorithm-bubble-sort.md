@@ -38,11 +38,11 @@ keywords: Algorithm，算法，冒泡排序
 public class BubbleSort {
 
     // array为待排序数组
-    public static int[] bubbleSort(int[] array){
+    public static void bubbleSort(int[] array){
         int length=array.length;
 
         if(length<=1){
-            return array;
+            return;
         }
 
         for(int i=0;i<length;i++){
@@ -58,8 +58,6 @@ public class BubbleSort {
             }
             if(!flag) break;
         }
-
-        return array;
     }
 }
 ```
