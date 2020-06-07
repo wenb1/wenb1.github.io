@@ -39,8 +39,8 @@ navs:
     label: Wiki
 
   -
-    href: /links/
-    label: Link
+    href: /leetcode/
+    label: Leetcode
 
   -
     href: /about/
