@@ -35,8 +35,8 @@ navs:
     label: Category
 
   -
-    href: /leetcode/
-    label: Leetcode
+    href: /wiki/
+    label: Wiki
 
   -
     href: /link/
