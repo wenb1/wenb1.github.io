@@ -27,7 +27,7 @@ permalink: /leetcode/
 -->
 <section class="container posts-content">
 {% for tag in site.tags %}
-<h3>{{ tag }}</h3>
+<h3>{{ tag | first}}</h3>
 <ol class="posts-list">
 {% for post in site.posts %}
 <li class="posts-list-item">
