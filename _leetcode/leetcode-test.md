@@ -1,6 +1,6 @@
 ---
 layout: wiki
-title: Android Studio
+title: Android
 categories: Android
 description: Android Studio 快捷键及使用技巧汇总
 keywords: Android, Android Studio
@@ -193,7 +193,7 @@ logcat 默认缓冲区条数不大，在日志比较多的时候经常出现想�
 
 默认情况下文件头注释里的 author 是当前登录操作系统的用户名，如 Administrator 或 Lenovo 等，如果我们想替换成自己的名字，方法是打开 Android Studio 可执行程序，比如 studio64.exe 同目录下的 studio64.exe.vmoptions，在最下面加入这样一行：
 
-​```
+```
 -Duser.name=mazhuang
 ​```
 
@@ -266,7 +266,7 @@ logcat 默认缓冲区条数不大，在日志比较多的时候经常出现想�
 
 这样修改之后，会导致一个问题，就是 Android Studio 升级会失败，提示：
 
-​```
+```
 Some conflicts were found in the installation area.
 
 Some on the conficts below do not have a solution, so the patch cannot be applied.
@@ -291,4 +291,7 @@ Press Cancel to exit.
 ### Android Plugin 与 Gradle 版本对应
 
 <https://developer.android.com/studio/releases/gradle-plugin.html>
+
+```
+
 ```
