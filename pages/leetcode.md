@@ -24,16 +24,19 @@ permalink: /leetcode/
 {% endif %}
 {% endfor %}
 </ul>
+
 -->
 <section class="container posts-content">
 {% for tag in site.tags %}
 <h3>{{ tag | first}}</h3>
 <ol class="posts-list">
 {% for post in site.posts %}
+{% if post.tags==tag %}
 <li class="posts-list-item">
 <span class="posts-list-meta">{{ post.date | date:"%Y-%m-%d" }}</span>
 <a class="posts-list-name" href="{{ site.url }}{{ post.url }}">{{ post.title }}</a>
 </li>
+{% endif %}
 {% endfor %}
 </ol>
 {% endfor %}
