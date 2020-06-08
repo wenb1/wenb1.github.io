@@ -26,9 +26,6 @@ permalink: /leetcode/
 </ul>
 -->
 <section class="container posts-content">
-{% assign sorted_categories = site.tags | sort %}
-{% for category in sorted_categories %}
-<h3 id="{{ category[0] }}">{{ category }}</h3>
 <ol class="posts-list">
 {% for post in site.leetcode %}
 <li class="posts-list-item">
@@ -37,5 +34,4 @@ permalink: /leetcode/
 </li>
 {% endfor %}
 </ol>
-{% endfor %}
 </section>
