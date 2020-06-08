@@ -1,10 +1,12 @@
 ---
 layout: post
-title: 48.Rotate Image
+title: 48. Rotate Image
 tags: Array
 description: 48.Rotate Image
 keywords: Array，算法，leetcode
 ---
+
+You are given an *n* x *n* 2D matrix representing an image. Rotate the image by 90 degrees (clockwise).
 
 # 解法一
 
