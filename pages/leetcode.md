@@ -26,7 +26,7 @@ permalink: /leetcode/
 </ul>
 -->
 <section class="container posts-content">
-{% assign sorted_categories = site.categories[Test] | sort %}
+{% assign sorted_categories = site.categories.Test | sort %}
 {% for category in sorted_categories %}
 <h3 id="{{ category[0] }}">{{ category | first }}</h3>
 <ol class="posts-list">
