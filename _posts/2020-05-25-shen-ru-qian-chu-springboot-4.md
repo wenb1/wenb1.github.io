@@ -111,7 +111,7 @@ public class MyInterceptor implements Interceptor{
 
 ```
 
-这个拦截器的功能也不复杂， 接着就要谈谈我和你的约定了。约定是本节的核心，也是Spring AOP 的本质。我先提供一个类一`ProxyBean`使用，它有一个静态的(`static`)方法：
+这个拦截器的功能也不复杂， 接着就要谈谈我和你的约定了。约定是本节的核心，也是Spring AOP 的本质。我先提供一个类一`ProxyBean`使用，它有一个静态的(`static`)方法
 
 ```java
 public static Object getProxyBean(Object target, Interceptor interceptor)
