@@ -20,7 +20,7 @@ keywords: Algorithm，算法，归并排序
 
 首先，写递归代码的技巧就是，分析得出递推公式，然后找到终止条件，最后将递推公式翻译成递归代码。所以，要想写出归并排序的代码，我们先写出归并排序的递推公式。
 
-```java
+```markdown
 递推公式：
 merge_sort(p…r) = merge(merge_sort(p…q), merge_sort(q+1…r))
 
