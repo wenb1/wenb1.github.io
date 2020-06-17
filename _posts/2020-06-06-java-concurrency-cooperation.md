@@ -167,3 +167,182 @@ public class WaxOMatic {
 要注意的是，`notifyAll()`不是唤醒所有调用了`wait()`方法的线程，而是所有调用了`wait()`并且等待同一把锁的线程。
 
 例如：
+
+```java
+public class Blocker {
+    synchronized void waitingCall(){
+        try{
+            while(!Thread.interrupted()){
+                wait();
+                System.out.println(Thread.currentThread()+" ");
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    synchronized void prod(){notify();}
+
+    synchronized void prodAll(){notifyAll();}
+}
+```
+
+```java
+public class Task implements Runnable{
+    static Blocker blocker=new Blocker();
+
+    @Override
+    public void run() {
+        blocker.waitingCall();
+    }
+}
+```
+
+```java
+public class Task2 implements Runnable{
+    static Blocker blocker=new Blocker();
+
+    @Override
+    public void run() {
+        blocker.waitingCall();
+    }
+}
+```
+
+```java
+public class NotifyVsNotifyAll {
+    public static void main(String[] args) throws InterruptedException {
+        ExecutorService exec= Executors.newCachedThreadPool();
+        for(int i=0;i<5;i++){
+            exec.execute(new Task());
+        }
+        exec.execute(new Task2());
+        Timer timer=new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            boolean prod=true;
+            @Override
+            public void run() {
+                if(prod){
+                    System.out.println("\nnotify()");
+                    Task.blocker.prod();
+                    prod=false;
+                }else{
+                    System.out.println("\nnotifyAll()");
+                    Task.blocker.prodAll();
+                    prod=true;
+                }
+
+            }
+        }, 400,400);
+        TimeUnit.SECONDS.sleep(5);
+        timer.cancel();
+        System.out.println("\nTimer canceled");
+        TimeUnit.MILLISECONDS.sleep(500);
+        System.out.println("Task2.blocker.prodAll()");
+        Task2.blocker.prodAll();
+        TimeUnit.MILLISECONDS.sleep(500);
+        System.out.println("\nShutting down");
+        exec.shutdownNow();
+    }
+}
+
+```
+
+# 3. 生产者(Producer)和消费者(Consumer)
+
+一个餐厅有一个厨师和一个服务员。服务员必须需要等待厨师做好饭才能给客人上菜。当厨师准备好了饭菜，厨师会通知服务员，服务员才能上菜然后继续等待。这个例子就好比线程间的协作。厨师是生产者，服务员是消费者。
+
+实现：
+
+```java
+public class Meal {
+    private final int orderNum;
+    public Meal(int orderNum){
+        this.orderNum=orderNum;
+    }
+    public String toString(){
+        return "Meal "+orderNum;
+    }
+}
+```
+
+```java
+public class WaitPerson implements Runnable{
+    private Restaurant restaurant;
+    public WaitPerson(Restaurant r){
+        restaurant=r;
+    }
+
+    public void run(){
+        try{
+            while(!Thread.interrupted()){
+                synchronized (this){
+                    while(restaurant.meal==null)
+                        wait();
+                }
+                System.out.println("WaitPerson got "+restaurant.meal);
+                synchronized (restaurant.chef){
+                    restaurant.meal=null;
+                    restaurant.chef.notifyAll();
+                }
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+```java
+public class Chef implements Runnable{
+    private Restaurant restaurant;
+    private int count=0;
+
+    public Chef(Restaurant r){
+        restaurant=r;
+    }
+
+    public void run(){
+        try{
+            while (!Thread.interrupted()){
+                synchronized (this){
+                    while (restaurant.meal!=null)
+                        wait();
+                }
+                if(++count==10){
+                    System.out.println("Out of food, closing");
+                    restaurant.exec.shutdownNow();
+                }
+                System.out.println("Order up!");
+                synchronized (restaurant.waitPerson){
+                    restaurant.meal=new Meal(count);
+                    restaurant.waitPerson.notifyAll();
+                }
+                TimeUnit.MILLISECONDS.sleep(100);
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+```java
+public class Restaurant {
+    Meal meal;
+    ExecutorService exec=Executors.newCachedThreadPool();
+    WaitPerson waitPerson=new WaitPerson(this);
+    Chef chef=new Chef(this);
+
+    public Restaurant(){
+        exec.execute(chef);
+        exec.execute(waitPerson);
+    }
+
+    public static void main(String[] args) {
+        new Restaurant();
+    }
+}
+```
+
+我们可以看到，`waitPerson`一开始会调用`wait()`方法，等待`Chef`唤醒。
