@@ -46,7 +46,7 @@ synchronized(x){
 }
 ```
 
-如果想调用`x`的`notifyAll()`方法，首先要获得`x`的对象锁。
+如果想调用`x`的`notifyAll()`方法，首先要获得`x`的对象锁。调用`notify()`或`notifyAll()`后，当前线程不会马上释放该对象锁，要等到程序退出同步块后，当前线程才会释放锁。
 
 举个例子：
 
@@ -157,6 +157,153 @@ public class WaxOMatic {
 | 所属类   | `Thread`       | `Object`             |
 | 锁       | 不会释放对象锁 | 会释放对象锁         |
 | 使用场景 | 适用于任何范围 | 只能在同步代码块使用 |
+
+## 1.1 `notify`早期通知问题
+
+`notify`通知的遗漏很容易理解，即A还没开始` wait`的时候，B已经notify了，这样，B通知是没有任何响应的，当 B退出 `synchronized`代码块后，A再开始`wait`，便会一直阻塞等待，直到被别的线程打断。比如在下面的示例代码中，就模拟出`notify`早期通知带来的问题：
+
+```java
+public class NotifyThread extends Thread{
+    private String lock;
+
+    public NotifyThread(String lock){
+        this.lock=lock;
+    }
+
+    @Override
+    public void run() {
+        synchronized (lock){
+            System.out.println(Thread.currentThread().getName() + "  进去代码块");
+            System.out.println(Thread.currentThread().getName() + "  开始notify");
+            lock.notify();
+            System.out.println(Thread.currentThread().getName() + "  结束开始notify");
+        }
+    }
+}
+```
+
+```java
+public class WaitThread extends Thread{
+    private String lock;
+
+    public WaitThread(String lock){
+        this.lock=lock;
+    }
+
+    @Override
+    public void run() {
+        synchronized (lock){
+            System.out.println(Thread.currentThread().getName() + "  进去代码块");
+            System.out.println(Thread.currentThread().getName() + "  开始wait");
+            try {
+                lock.wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println(Thread.currentThread().getName() + "   结束wait");
+        }
+    }
+}
+```
+
+```java
+public class EarlyNotifyDemo {
+
+    public static void main(String[] args) throws InterruptedException {
+        String lock="lock";
+        Thread waitThread=new WaitThread(lock);
+        Thread notifyThread=new NotifyThread(lock);
+
+        notifyThread.start();
+
+        Thread.sleep(100);
+
+        waitThread.start();
+    }
+}
+```
+
+**解决方法：**
+
+一般是添加一个状态标志，让`waitThread`调用`wait()`方法前先判断状态是否已经改变了没，如果通知早已发出的话，`WaitThread`就不再去`wait()`，对之前的代码进行改进：
+
+```java
+public class Flag {
+    public boolean isWait=true;
+}
+```
+
+```java
+public class NotifyThread extends Thread{
+    private String lock;
+    private Flag flag;
+
+    public NotifyThread(String lock, Flag flag){
+        this.lock=lock;
+        this.flag=flag;
+    }
+
+    @Override
+    public void run() {
+        synchronized (lock){
+            System.out.println(Thread.currentThread().getName() + "  进去代码块");
+            System.out.println(Thread.currentThread().getName() + "  开始notify");
+            lock.notify();
+            flag.isWait=false;
+            System.out.println(Thread.currentThread().getName() + "  结束开始notify");
+        }
+    }
+}
+```
+
+```java
+public class WaitThread extends Thread{
+    private String lock;
+    private Flag flag;
+
+    public WaitThread(String lock, Flag flag){
+        this.lock=lock;
+        this.flag=flag;
+    }
+
+    @Override
+    public void run() {
+        synchronized (lock){
+            while(flag.isWait){
+                System.out.println(Thread.currentThread().getName() + "  进去代码块");
+                System.out.println(Thread.currentThread().getName() + "  开始wait");
+                try {
+                    lock.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println(Thread.currentThread().getName() + "   结束wait");
+            }
+        }
+    }
+}
+```
+
+```java
+public class EarlyNotifyDemo {
+
+    public static void main(String[] args) throws InterruptedException {
+        String lock="lock";
+        Flag flag=new Flag();
+
+        Thread waitThread=new WaitThread(lock, flag);
+        Thread notifyThread=new NotifyThread(lock, flag);
+
+        notifyThread.start();
+
+        Thread.sleep(100);
+
+        waitThread.start();
+    }
+}
+```
+
+这段代码只是增加了一个`isWait`状态变量，`NotifyThread`调用`notify`方法后会对状态变量进行更新，在`WaitThread`中调用`wait`方法之前会先对状态变量进行判断，在该示例中，调用`notify`后将状态变量`isWait`改变为`false`，因此，在`WaitThread`中`while`对`isWait`判断后就不会执行`wait`方法，从而避免了Notify过早通知造成遗漏的情况。
 
 # 2. `notify()`和`notifyAll()`
 
@@ -345,4 +492,12 @@ public class Restaurant {
 }
 ```
 
-我们可以看到，`waitPerson`一开始会调用`wait()`方法，等待`Chef`唤醒。
+我们可以看到，因为一开始的时候`meal`是`null`值，所以`waitPerson`会调用`wait()`方法，等待被`chef`唤醒。而`Chef`因为`meal`值为`null`，之后会获得`waitPerson`的对象锁赋值给`meal`一个`Meal`对象，之后唤醒`waitPerson`。相应的，`waitPerson`会获得`Chef`的对象锁，消费`meal`对象，之后再唤醒`chef`。这样就实现了两个线程之间的配合。
+
+
+
+------
+
+**参考文章**
+
+[一篇文章，让你彻底弄懂生产者--消费者问题 (你听___)](https://www.jianshu.com/p/e29632593057)
