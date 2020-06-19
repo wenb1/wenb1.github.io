@@ -1,6 +1,6 @@
 ---
 layout: post
-title: 快速排序(	Quick Sort)
+title: 快速排序(Quick Sort)
 categories: Algorithm
 description: 讲解快速排序
 keywords: Algorithm，算法，快速排序
