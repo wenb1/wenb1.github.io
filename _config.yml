@@ -80,9 +80,9 @@ collections:
     wiki:
         output: true
         permalink: /wiki/:path/
-    #leetcode:
-    #    output: true
-     #   permalink: /leetcode/:path/
+    leetcode:
+        output: true
+        permalink: /leetcode/:path/
 
 
 repository: wenb1/wenb1.github.io

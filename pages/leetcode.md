@@ -2,12 +2,12 @@
 layout: leetcode
 title: Leetcode
 description: Practice makes perfect
-keywords: Leetcode
+keywords: 分类
 comments: false
-menu: Leetcode
+menu: 分类
 permalink: /leetcode/
 ---
-<!--
+
 <section class="container posts-content">
 {% for tag in site.tags %}
 <h3>{{ tag | first}}</h3>
@@ -21,4 +21,3 @@ permalink: /leetcode/
 </ol>
 {% endfor %}
 </section>
--->
