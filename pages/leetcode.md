@@ -1,5 +1,5 @@
 ---
-layout: categories
+layout: leetcode
 title: Leetcode
 description: Practice makes perfect
 keywords: Leetcode
