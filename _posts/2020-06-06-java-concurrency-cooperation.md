@@ -762,9 +762,172 @@ public class WaxOMatic2 {
 
 ## 3.2 使用`BlockingQueue`实现生产者-消费者模型
 
+我们使用一个生活中的例子，试想一个机器有三个功能：制作面包，摸黄油和抹果酱。
 
+```java
+public class Toast {
+    public enum Status{
+        DRY, BUTTERED, JAMMED
+    }
 
+    private Status status=Status.DRY;
+    private final int id;
 
+    public Toast(int idn){
+        id=idn;
+    }
+
+    public void butter(){
+        status=Status.BUTTERED;
+    }
+
+    public void jam(){
+        status=Status.JAMMED;
+    }
+
+    public Status getStatus(){
+        return status;
+    }
+
+    public int getId(){
+        return id;
+    }
+
+    public String toString(){
+        return "Toast "+id+": "+status;
+    }
+}
+```
+
+```java
+public class ToastQueue extends LinkedBlockingQueue {
+}
+```
+
+```java
+public class Toaster implements Runnable{
+    private ToastQueue toastQueue;
+    private int count=0;
+    private Random rand=new Random(47);
+
+    public Toaster(ToastQueue tq){
+        toastQueue=tq;
+    }
+
+    @Override
+    public void run() {
+        try{
+            while (!Thread.interrupted()){
+                TimeUnit.MILLISECONDS.sleep(100+rand.nextInt(500));
+                Toast t=new Toast(count++);
+                System.out.println(t);
+                toastQueue.put(t);
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.println("Toaster off");
+    }
+}
+```
+
+```java
+public class Butterer implements Runnable{
+    private ToastQueue dryQueue, butteredQueue;
+
+    public Butterer(ToastQueue dry, ToastQueue buttered){
+        dryQueue=dry;
+        butteredQueue=buttered;
+    }
+
+    @Override
+    public void run() {
+        try{
+            while(!Thread.interrupted()){
+                Toast t=(Toast) dryQueue.take();
+                t.butter();
+                System.out.println(t);
+                butteredQueue.put(t);
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.println("Butterer off");
+    }
+}
+```
+
+```java
+public class Jammer implements Runnable{
+    private ToastQueue butteredQueue, finishedQueue;
+
+    public Jammer(ToastQueue buttered, ToastQueue finished){
+        butteredQueue=buttered;
+        finishedQueue=finished;
+    }
+
+    @Override
+    public void run() {
+        try {
+            while (!Thread.interrupted()){
+                Toast t=(Toast) butteredQueue.take();
+                t.jam();
+                System.out.println(t);
+                finishedQueue.put(t);
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.println("Jammer off");
+    }
+}
+```
+
+```java
+public class Eater implements Runnable{
+    private ToastQueue finishedQueue;
+    private int counter=0;
+
+    public Eater(ToastQueue finished){
+        finishedQueue=finished;
+    }
+
+    @Override
+    public void run() {
+        try{
+            while(!Thread.interrupted()){
+                Toast t=(Toast) finishedQueue.take();
+                if(t.getId()!=counter++||t.getStatus()!=Toast.Status.JAMMED){
+                    System.out.println(">>>>>Error: "+t);
+                    System.exit(1);
+                }else
+                    System.out.println("Chomp! "+t);
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.println("Eater off");
+    }
+}
+```
+
+```java
+public class ToastOMatic {
+    public static void main(String[] args) throws InterruptedException {
+        ToastQueue dryQueue=new ToastQueue();
+        ToastQueue butteredQueue=new ToastQueue();
+        ToastQueue finishedQueue=new ToastQueue();
+
+        ExecutorService exec= Executors.newCachedThreadPool();
+        exec.execute(new Toaster(dryQueue));
+        exec.execute(new Butterer(dryQueue, butteredQueue));
+        exec.execute(new Jammer(butteredQueue, finishedQueue));
+        exec.execute(new Eater(finishedQueue));
+        TimeUnit.SECONDS.sleep(5);
+        exec.shutdown();
+    }
+}
+```
 
 ------
 
