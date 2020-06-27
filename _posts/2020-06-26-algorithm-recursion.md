@@ -46,7 +46,7 @@ int f(int n) {
 
    把问题分解为子问题，把子问题再分解为子子问题，一层一层分解下去，不能存在无限循环，这就需要有终止条件。还是电影院的例子，第一排的人不需要再继续询问任何人，就知道自己在哪一排，也就是 f(1)=1，这就是递归的终止条件。
 
-**如何编写递归代码？**
+# 如何编写递归代码？
 
 刚刚铺垫了这么多，现在我们来看，如何来写递归代码？我个人觉得，写递归代码最关键的是写出递推公式，找到终止条件，剩下将递推公式转化为代码就很简单了。
 
@@ -107,7 +107,7 @@ Exception in thread "main" java.lang.StackOverflowError
 int depth = 0;
 
 int f(int n) { 
-    ++depth； 
+    ++depth;
     if (depth > 1000) throw exception; 
     if (n == 1) return 1; 
     return f(n-1) + 1;
