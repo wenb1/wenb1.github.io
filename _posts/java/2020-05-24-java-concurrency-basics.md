@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Java并发(Concurrency)之并发基础(Concurrency Basics)
+title: Java并发(Concurrency)之并发基础(Basics)
 categories: Java
 description: 讲解Java中的并发
 keywords: Java, concurrency, 并发
