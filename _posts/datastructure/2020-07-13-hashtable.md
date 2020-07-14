@@ -181,11 +181,11 @@ int hash(String key) {
 
 两个对象的`hashCode()`返回值相等不能判断这两个对象是相等的，但两个对象的`hashcode()`返回值不相等则可以判定两个对象一定不相等。
 
-## 8.2 `equals()`正常而`hashCode()`不正常
+## 8.2 `equals()`正确而`hashCode()`不正确
 
 如果`equals()`正常运行，而`hashCode()`不正确。则两个相同的对象会得到不同的`hashCode()`值，从而导致散列值不同，最后它们插入到散列表中的位置就不同，从而导致两个相同对象被插入到不同位置。
 
-## 8.3 `equals()`不正常而`hashCode()`正常
+## 8.3 `equals()`不正确而`hashCode()`正确
 
 尽管`hashCode()`的正确能保证两个对象应该放在同一个桶中，可是如果之后涉及到其它数据结构利用了散列表，同时还有去重的功能的话，就不能正常工作了，因为`equals()`不正确，导致相同的对象祧不出来。
 
@@ -202,5 +202,3 @@ int hash(String key) {
 [stackoverflow](https://stackoverflow.com/questions/2265503/why-do-i-need-to-override-the-equals-and-hashcode-methods-in-java)
 
 [浅见equals()与hashCode()之间的关系 (占位符号)](https://blog.csdn.net/zai_xia/article/details/81806446)
-
-[数据结构与算法之美 (王争)](https://time.geekbang.org/column/article/64233)
