@@ -154,4 +154,4 @@ public int bsearch(int[] a, int n, int value) {
 
 **参考文章：**
 
-[数据结果与算法之美 (王争)](https://time.geekbang.org/column/article/42520)
+[数据结构与算法之美 (王争)](https://time.geekbang.org/column/article/42520)

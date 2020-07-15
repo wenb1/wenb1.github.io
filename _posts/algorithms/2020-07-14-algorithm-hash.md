@@ -123,4 +123,4 @@ MD5("jiajia") = cd611a31ea969b908932d44d126d195b
 
 **参考文章：**
 
-[数据结果与算法之美 (王争)](https://time.geekbang.org/column/article/67388)
+[数据结构与算法之美 (王争)](https://time.geekbang.org/column/article/67388)
