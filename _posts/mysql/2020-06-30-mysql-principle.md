@@ -105,3 +105,11 @@ MySQL会把处理过的查询请求和结果缓存起来，如果下次有请求
 |    `NDB`    |        MySQL集群专用存储引擎         |
 
 我们常用的引擎只有`InnoDB`和`MyISAM`
+
+<br/>
+
+------
+
+**参考文章：**
+
+[MySQL 是怎样运行的：从根儿上理解 MySQL](https://juejin.im/book/5bffcbc9f265da614b11b731)
