@@ -1,7 +1,7 @@
 ---
 layout: post
 title: What is Shell?
-tags: Shell
+categories: Shell
 description: Introduction to Shell
 keywords: Shell
 ---
