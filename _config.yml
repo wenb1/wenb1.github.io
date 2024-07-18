@@ -30,6 +30,10 @@ navs:
     href: /
     label: Home
 
+-
+    href: /archives/
+    label: Archives
+
   -
     href: /categories/
     label: Category
