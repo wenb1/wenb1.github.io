@@ -1,11 +1,11 @@
 ---
-layout: leetcode
-title: Leetcode
+layout: stock
+title: Stock
 description: Practice makes perfect
 keywords: 分类
 comments: false
 menu: 分类
-permalink: /leetcode/
+permalink: /stock/
 ---
 
 <section class="container posts-content">

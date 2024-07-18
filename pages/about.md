@@ -1,16 +1,16 @@
 ---
 layout: page
 title: About
-description: Talk is cheap, show me your code
+description:
 keywords: Bo Wen, 问博
 comments: true
 menu: 关于
 permalink: /about/
 ---
 
-I'm Bo Wen, a future master student in computing and software.
+I'm Bo Wen。
 
-Currenly living in Hamilton, Ontario, Canada.
+Currenly living in Hangzhou, China.
 
 ## Contact(联系)
 
@@ -21,7 +21,7 @@ Currenly living in Hamilton, Ontario, Canada.
 </ul>
 
 
-## Skill Sets(技术栈)
+## Interests(兴趣)
 
 {% for category in site.data.skills %}
 ### {{ category.name }}
