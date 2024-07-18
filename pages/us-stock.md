@@ -1,11 +1,11 @@
 ---
 layout: stock
-title: Stock
+title: USStock
 description: Practice makes perfect
 keywords: 分类
 comments: false
 menu: 分类
-permalink: /stock/
+permalink: /us-stock/
 ---
 
 <section class="container posts-content">

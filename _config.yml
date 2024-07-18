@@ -77,12 +77,12 @@ plugins:
     - jemoji
 #     - jekyll-mentions
 collections:
-    wiki:
+    a-shares-stock:
         output: true
-        permalink: /wiki/:path/
-    leetcode:
+        permalink: /a-shares-stock/:path/
+    us-stock:
         output: true
-        permalink: /leetcode/:path/
+        permalink: /us-stock/:path/
 
 
 repository: wenb1/wenb1.github.io
