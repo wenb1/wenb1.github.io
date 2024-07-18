@@ -1,20 +1,10 @@
-- name: Computer Basics
+- name: 工作
   keywords:
-      - Computer Network
-      - Database
-      - Data Structure
-      - Algorithm
-      - Design Patterns
-      - Operating System
+      - 光伏
 
-- name: Software Engineer Skills
+- name: 投资
   keywords:
-      - Java
-      - Spring Boot
-      - MyBatis
-      - Python
-      - Git
-      - SVN
-      - Nginx
-      - MySQL
+      - A股
+      - 美股
+      - 基金
 
