@@ -1,6 +1,6 @@
 ---
 layout: stock
-title: USStock
+title: U.S. Stock
 description: Practice makes perfect
 keywords: 分类
 comments: false

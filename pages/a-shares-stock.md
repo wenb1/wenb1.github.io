@@ -1,6 +1,6 @@
 ---
 layout: stock
-title: ASharesStock
+title: A-Shares
 description: Practice makes perfect
 keywords: 分类
 comments: false
