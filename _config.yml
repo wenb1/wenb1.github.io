@@ -35,12 +35,12 @@ navs:
     label: Category
     
   -
-    href: /leetcode/
-    label: Leetcode
+    href: /a-shares-stock/
+    label: A-Shares
 
   -
-    href: /wiki/
-    label: Wiki
+    href: /us-stock/
+    label: U.S. Stocks
 
   -
     href: /links/
